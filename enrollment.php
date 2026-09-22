@@ -1,30 +1,6 @@
 <?php
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $lastName = $_POST['last_name'] ?? '';
-    $firstName = $_POST['first_name'] ?? '';
-    $middleName = $_POST['middle_name'] ?? '';
-    $gender = $_POST['gender'] ?? '';
-    $dateOfBirth = $_POST['date_of_birth'] ?? '';
-    $address = $_POST['address'] ?? '';
-    $placeOfBirth = $_POST['place_of_birth'] ?? '';
-
-    $fatherName = $_POST['father_name'] ?? '';
-    $fatherEmail = $_POST['father_email'] ?? '';
-    $motherName = $_POST['mother_name'] ?? '';
-    $motherEmail = $_POST['mother_email'] ?? '';
-    $guardianName = $_POST['guardian_name'] ?? '';
-    $guardianEmail = $_POST['guardian_email'] ?? '';
-
-    echo '<pre>';
-    print_r($_POST);
-    echo '</pre>';
-    exit;
-}
-
 $pageTitle = 'Enrollment - Barangay Daycare Center';
 include('./layout/header.php');
-
 ?>
 
 <section class="py-5">
@@ -45,7 +21,7 @@ include('./layout/header.php');
             <div class="card mt-3">
 
                 <div class="card-header bg-white rounded-top-4 p-4">
-                    <h3 id="stepTitle" class="fs-4 fw-bold text-info mb-1">
+                    <h3 id="stepTitle" class="fs-5 fw-bold mb-1">
                         Child Information
                     </h3>
                     <p id="stepDescription" class="mb-0 text-muted small">
