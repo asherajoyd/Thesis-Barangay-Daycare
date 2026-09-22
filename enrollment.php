@@ -30,15 +30,19 @@ include('./layout/header.php');
 <section class="py-5">
     <div class="container">
 
-        <span class="fw-bold text-primary ls3">ENROLLMENT</span>
-        <h1 class="fw-bold display-4">Child Enrollment</h1>
-        <p class="text-muted small mb-4">
-            Complete the form below to submit your child's daycare enrollment application.
-        </p>
+       <div class="p-4 card">
+            <div class="card-body">
+                <span class="fw-bold text-primary ls3">ENROLLMENT</span>
+                <h1 class="fw-bold">Child Enrollment</h1>
+                <p class="text-muted small mb-0">
+                    Complete the form below to submit your child's daycare enrollment application.
+                </p>
+            </div>
+       </div>
 
         <form method="POST">
 
-            <div class="card rounded-4 mt-3">
+            <div class="card mt-3">
 
                 <div class="card-header bg-white rounded-top-4 p-4">
                     <h3 id="stepTitle" class="fs-4 fw-bold text-info mb-1">
