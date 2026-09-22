@@ -1,0 +1,210 @@
+/* ==========================================================================
+   Custom Theme Definitions
+   ========================================================================== */
+:root {
+  /* Your Theme Variables */
+  --color-primary: #166534;
+  --color-primary-hover: #15803d;
+  --color-primary-dark: #082c18;
+
+  --color-secondary: #365314;
+  --color-accent: #84cc16;
+
+  --color-background: #f5f7f5;
+  --color-paper: #ffffff;
+  --color-paper-soft: #eef3ef;
+
+  --color-text: #17231a;
+  --color-text-secondary: #526158;
+  --color-text-muted: #7b887f;
+
+  --color-border: #dce4de;
+
+  --color-success: #16a34a;
+  --color-warning: #f7b927;
+  --color-error: #dc2626;
+  --color-info: #0284c7;
+
+  /* Bootstrap Core CSS Variable Mapping */
+  --bs-primary: var(--color-primary) !important;
+  --bs-primary-rgb: 22, 101, 52 !important;
+
+  --bs-secondary: var(--color-secondary) !important;
+  --bs-secondary-rgb: 54, 83, 20 !important;
+
+  --bs-success: var(--color-success) !important;
+  --bs-success-rgb: 22, 163, 74 !important;
+
+  --bs-warning: var(--color-warning) !important;
+  --bs-warning-rgb: 247, 185, 39 !important;
+
+  --bs-danger: var(--color-error) !important;
+  --bs-danger-rgb: 220, 38, 38 !important;
+
+  --bs-info: var(--color-info) !important;
+  --bs-info-rgb: 2, 132, 199 !important;
+
+  --bs-body-bg: var(--color-background) !important;
+  --bs-body-color: var(--color-text) !important;
+  --bs-border-color: var(--color-border) !important;
+  --bs-link-color: var(--color-primary) !important;
+  --bs-link-hover-color: var(--color-primary-hover) !important;
+  --bs-focus-ring-color: rgba(22, 101, 52, 0.25) !important;
+}
+
+/* ==========================================================================
+   Global Body & Text Overrides
+   ========================================================================== */
+body {
+  background-color: var(--color-background) !important;
+  color: var(--color-text) !important;
+}
+
+.text-muted {
+  color: var(--color-text-muted) !important;
+}
+
+.text-secondary {
+  color: var(--color-text-secondary) !important;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+/* Primary Button */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover, 
+.btn-primary:focus, 
+.btn-primary:active, 
+.btn-primary.active {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #ffffff !important;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  color: #ffffff !important;
+}
+.btn-secondary:hover, 
+.btn-secondary:focus, 
+.btn-secondary:active, 
+.btn-secondary.active {
+  background-color: #283e0f !important;
+  border-color: #283e0f !important;
+  color: #ffffff !important;
+}
+
+/* Custom Accent Button Class */
+.btn-accent {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #17231a;
+}
+.btn-accent:hover, 
+.btn-accent:focus, 
+.btn-accent:active {
+  background-color: #70b010;
+  border-color: #70b010;
+  color: #17231a;
+}
+
+/* Outline Primary Button */
+.btn-outline-primary {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+.btn-outline-primary:hover, 
+.btn-outline-primary:focus, 
+.btn-outline-primary:active {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   Background Utilities & Cards
+   ========================================================================== */
+
+.bg-primary { background-color: var(--color-primary) !important; }
+.bg-secondary { background-color: var(--color-secondary) !important; }
+.bg-success { background-color: var(--color-success) !important; }
+.bg-warning { background-color: var(--color-warning) !important; }
+.bg-danger { background-color: var(--color-error) !important; }
+.bg-info { background-color: var(--color-info) !important; }
+.bg-accent { background-color: var(--color-accent) !important; }
+
+/* Custom Surface Classes based on your theme */
+.bg-paper { background-color: var(--color-paper) !important; }
+.bg-paper-soft { background-color: var(--color-paper-soft) !important; }
+
+/* Bootstrap Cards targeting paper surface */
+.card {
+  background-color: var(--color-paper) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+/* ==========================================================================
+   Form Controls
+   ========================================================================== */
+
+.form-control, 
+.form-select {
+  background-color: var(--color-paper) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+  border-radius: 12px !important;
+  padding: 8px !important
+}
+
+.form-control:focus, 
+.form-select:focus, 
+.form-check-input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(22, 101, 52, 0.25) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* ==========================================================================
+   Navigation & Pagination
+   ========================================================================== */
+
+.nav-pills .nav-link.active, 
+.nav-pills .show > .nav-link {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.nav-link {
+  color: var(--color-primary);
+}
+.nav-link:hover {
+  color: var(--color-primary-hover);
+}
+
+.page-item.active .page-link {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+.page-link {
+  color: var(--color-primary) !important;
+  background-color: var(--color-paper) !important;
+  border-color: var(--color-border) !important;
+}
+.page-link:hover {
+  color: var(--color-primary-hover) !important;
+  background-color: var(--color-paper-soft) !important;
+}

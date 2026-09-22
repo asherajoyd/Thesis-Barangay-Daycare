@@ -1,0 +1,26 @@
+.bg2 {
+    background: linear-gradient(20deg, var(--color-primary-dark) 0%, var(--color-primary-dark) 60%, var(--color-primary) 100%);
+    color: white !important;
+}
+
+.btn {
+    border-radius: 12px !important;
+    padding: 10px 20px !important;
+    font-weight: 500 !important;
+}
+
+.nav-link {
+    font-weight: 600 !important;
+}
+
+.ls1 {
+    letter-spacing: 1px !important;
+}
+
+.ls2 {
+    letter-spacing: 2px !important;
+}
+
+.ls3 {
+    letter-spacing: 3px !important;
+}
