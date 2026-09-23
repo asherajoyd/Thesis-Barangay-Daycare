@@ -1,5 +1,6 @@
 <?php
-include "../../api/conn.php";
+require_once '../guard.php';
+include "../../../api/conn.php";
 
 $first_name = "";
 $middle_name = "";
@@ -36,16 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // -------------------------------------------------------------
             // 2. SECOND INSERT: Save to `teacher` table
             // -------------------------------------------------------------
-            $sql_teacher = "INSERT INTO teacher (first_name, middle_name, last_name, email) VALUES (?, ?, ?, ?)";
-            $stmt_teacher =$conn->prepare($sql_teacher);$stmt_teacher->bind_param("ssss", $first_name,$middle_name, $last_name,$email);
+            $sql_teacher = "INSERT INTO teacher (first_name, middle_name, last_name, email, user_id) VALUES (?, ?, ?, ?, ?)";
+            $stmt_teacher =$conn->prepare($sql_teacher);$stmt_teacher->bind_param("ssssi", $first_name,$middle_name, $last_name,$email,$user_id);
 
             if ($stmt_teacher->execute()) {$stmt_teacher->close();
 
                 // Kapag parehong matagumpay, mag-redirect sa teachers list
-                header("Location: teachers.php");
+                $_SESSION['status'] = "success";
+                $_SESSION['message'] = "Teacher Added Successfully!";
+                header("Location: index.php");
                 exit();
             } else {
                 $errorMessage = "Saved to users, but failed to save to teacher table: " . $conn->error;
+                $_SESSION['status'] = "error";
+                $_SESSION['message'] = "Teacher Added Failed!";
             }
         } else {
             $errorMessage = "Failed to save user: " . $conn->error;
@@ -53,8 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-
-<?php include 'layout/header.php'; ?>
+<?php $pageTitle = "Create Teacher"; ?>
+<?php include '../layout/header.php'; ?>
 
 <div>
     <div class="card shadow-sm">
@@ -99,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="col-12 mt-4">
                         <button type="submit" class="btn btn-primary">Save</button>
-                        <a href="teachers.php" class="btn btn-secondary">Cancel</a>
+                        <a href="index.php" class="btn btn-secondary">Cancel</a>
                     </div>
                 </div>
             </form>
@@ -107,4 +112,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </div>
 
-<?php include 'layout/footer.php'; ?>
+<?php include '../layout/footer.php'; ?>

@@ -1,5 +1,3 @@
-<?php include('guard.php'); ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- css -->
-    <link href="../../theme.css" rel="stylesheet">
-    <link href="../../dashboard.css" rel="stylesheet">
+    <link href="../../../theme.css" rel="stylesheet">
+    <link href="../../../dashboard.css" rel="stylesheet">
 
     <!-- bootstrap css -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -170,7 +168,7 @@
                         </li>
 
                         <li>
-                            <a href="../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right me-2"></i> Sign Out </a>
+                            <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right me-2"></i> Sign Out </a>
                         </li>
 
                     </ul>

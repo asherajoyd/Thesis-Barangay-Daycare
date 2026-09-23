@@ -1,9 +1,13 @@
+<?php
+$baseUrl = '/ashera/thesis/dashboard/teacher/';
+?>
+
 <aside class="dashboard-sidebar" id="dashboardSidebar">
 
     <!-- Logo -->
     <div class="sidebar-brand">
 
-        <a href="index.php" class="brand-link">
+        <a href="<?= $baseUrl ?>" class="brand-link">
 
             <div class="brand-logo">
                 <i class="bi bi-house-heart-fill"></i>
@@ -36,7 +40,7 @@
             <nav class="sidebar-nav">
 
                 <a
-                    href="index.php"
+                    href="<?= $baseUrl ?>dashboard/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -67,7 +71,7 @@
 
                 <!-- Teachers -->
                 <a
-                    href="teachers.php"
+                    href="<?= $baseUrl ?>manage-teacher/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -79,10 +83,10 @@
                     </span>
                 </a>
 
-                
+
                 <!-- Parents -->
                 <a
-                    href="parents.php"
+                    href="<?= $baseUrl ?>parents.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -97,7 +101,7 @@
 
                 <!-- Children -->
                 <a
-                    href="children.php"
+                    href="<?= $baseUrl ?>children.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -108,9 +112,6 @@
                         Children
                     </span>
                 </a>
-
-
-
 
             </nav>
 
@@ -131,7 +132,7 @@
 
                 <!-- Attendance -->
                 <a
-                    href="attendance.php"
+                    href="<?= $baseUrl ?>attendance.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -146,7 +147,7 @@
 
                 <!-- Activities -->
                 <a
-                    href="activities.php"
+                    href="<?= $baseUrl ?>activities.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -161,7 +162,7 @@
 
                 <!-- Health Records -->
                 <a
-                    href="health-records.php"
+                    href="<?= $baseUrl ?>health-records.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -192,7 +193,7 @@
 
                 <!-- Users -->
                 <a
-                    href="users.php"
+                    href="<?= $baseUrl ?>users.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Users' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -207,7 +208,7 @@
 
                 <!-- Reports -->
                 <a
-                    href="reports.php"
+                    href="<?= $baseUrl ?>reports.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Reports' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -238,7 +239,7 @@
 
                 <!-- Settings -->
                 <a
-                    href="settings.php"
+                    href="<?= $baseUrl ?>settings.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Settings' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">

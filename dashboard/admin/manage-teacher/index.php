@@ -1,17 +1,33 @@
-<?php include 'layout/header.php'; ?>
+<?php $pageTitle = "Manage Teacher"; ?>
+<?php 
+    require_once '../guard.php';
+    include '../layout/header.php';
+?>
 
 <?php
-include "../../api/conn.php";
+include "../../../api/conn.php";
 $sql = "SELECT * FROM teacher";
 $result = $conn->query($sql);
 ?>
 
 <div>
-<div class="d-flex justify-content-between">
-    <h2 >Manage Teacher</h2>
-        <a href="create-teacher.php" class="btn btn-primary mb-3">Add Teacher</a>
+    <?php if (!empty($_SESSION['message'])): ?>
+        <div class="fw-semibold alert alert-<?php echo $_SESSION['status'] === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+            <?php echo htmlspecialchars($_SESSION['message']); ?>
 
-</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <?php
+        unset($_SESSION['status']);
+        unset($_SESSION['message']);
+        ?>
+    <?php endif; ?>
+    <div class="d-flex justify-content-between">
+        <h2 >Manage Teacher</h2>
+            <a href="create-teacher.php" class="btn btn-primary mb-3">Add Teacher</a>
+
+    </div>
 
     <div class="card p-0">
        <table class="table mb-0 data-table table-striped">
@@ -44,4 +60,4 @@ $result = $conn->query($sql);
    </div>
 </div>
 
-<?php include 'layout/footer.php'; ?>
+<?php include '../layout/footer.php'; ?>
