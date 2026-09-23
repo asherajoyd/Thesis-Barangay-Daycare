@@ -15,7 +15,7 @@ switch ($role) {
         exit;
 
     case 'teacher':
-        header('Location: teacher/index.php');
+        header('Location: teacher/dashboard/');
         exit;
 
     case 'parent':

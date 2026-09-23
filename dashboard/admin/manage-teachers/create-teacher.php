@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <div>
     <div class="card shadow-sm">
         <div class="card-body p-4">
-            <h2 class="mb-4">Add Teacher Account</h2>
+            <h2 class="fw-bold fs-3">Add Teacher</h2>
 
             <?php if (!empty($errorMessage)) { ?>
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">

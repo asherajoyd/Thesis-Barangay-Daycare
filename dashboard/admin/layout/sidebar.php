@@ -71,7 +71,7 @@ $baseUrl = '/ashera/thesis/dashboard/admin/';
 
                 <!-- Teachers -->
                 <a
-                    href="<?= $baseUrl ?>manage-teacher/"
+                    href="<?= $baseUrl ?>manage-teachers/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -86,7 +86,7 @@ $baseUrl = '/ashera/thesis/dashboard/admin/';
 
                 <!-- Parents -->
                 <a
-                    href="<?= $baseUrl ?>parents.php"
+                    href="<?= $baseUrl ?>manage-parents"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">

@@ -1167,3 +1167,19 @@ a {
 
 }
 
+
+
+
+
+
+
+
+
+
+.btn {
+    border-radius: 8px !important;
+    padding: 8px 20px !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    letter-spacing: 1px;
+}
