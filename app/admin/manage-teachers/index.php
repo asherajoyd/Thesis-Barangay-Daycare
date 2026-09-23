@@ -1,11 +1,11 @@
-<?php $pageTitle = "Manage Teacher"; ?>
 <?php 
+    $pageTitle = "Manage Teacher";
     require_once '../guard.php';
     include '../layout/header.php';
+    include "../../../api/conn.php";
 ?>
 
 <?php
-include "../../../api/conn.php";
 $sql = "SELECT * FROM teacher";
 $result = $conn->query($sql);
 ?>
