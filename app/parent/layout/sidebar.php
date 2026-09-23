@@ -1,5 +1,5 @@
 <?php
-$baseUrl = '/ashera/thesis/dashboard/teacher/';
+$baseUrl = '/ashera/thesis/app/parent/';
 ?>
 
 <aside class="dashboard-sidebar" id="dashboardSidebar">
@@ -69,9 +69,24 @@ $baseUrl = '/ashera/thesis/dashboard/teacher/';
 
             <nav class="sidebar-nav">
 
+                <!-- Teachers -->
+                <a
+                    href="<?= $baseUrl ?>manage-teacher/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-video3"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Teachers
+                    </span>
+                </a>
+
+
                 <!-- Parents -->
                 <a
-                    href="<?= $baseUrl ?>#"
+                    href="<?= $baseUrl ?>parents.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -86,7 +101,7 @@ $baseUrl = '/ashera/thesis/dashboard/teacher/';
 
                 <!-- Children -->
                 <a
-                    href="<?= $baseUrl ?>#"
+                    href="<?= $baseUrl ?>children.php"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -156,6 +171,83 @@ $baseUrl = '/ashera/thesis/dashboard/teacher/';
 
                     <span class="sidebar-link-text">
                         Health Records
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- =====================================================
+             MANAGEMENT
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                MANAGEMENT
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Users -->
+                <a
+                    href="<?= $baseUrl ?>users.php"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Users' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-gear"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Users
+                    </span>
+                </a>
+
+
+                <!-- Reports -->
+                <a
+                    href="<?= $baseUrl ?>reports.php"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Reports' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Reports
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- =====================================================
+             SYSTEM
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                SYSTEM
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Settings -->
+                <a
+                    href="<?= $baseUrl ?>settings.php"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Settings' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-gear"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Settings
                     </span>
                 </a>
 

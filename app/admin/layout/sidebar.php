@@ -1,5 +1,5 @@
 <?php
-$baseUrl = '/ashera/thesis/dashboard/admin/';
+$baseUrl = '/ashera/thesis/app/admin/';
 ?>
 
 <aside class="dashboard-sidebar" id="dashboardSidebar">

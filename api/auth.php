@@ -4,8 +4,6 @@ session_start();
 
 require_once('conn.php');
 
-header('Content-Type: application/json');
-
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -129,7 +127,7 @@ $_SESSION['fullname'] =
 echo json_encode([
     'success' => true,
     'message' => 'Login successful.',
-    'redirect' => 'dashboard/index.php'
+    'redirect' => 'app/index.php'
 ]);
 
 
