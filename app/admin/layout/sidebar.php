@@ -72,7 +72,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
                 <!-- Teachers -->
                 <a
                     href="<?= $baseUrl ?>manage-teachers/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-video3"></i>
@@ -87,7 +87,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
                 <!-- Parents -->
                 <a
                     href="<?= $baseUrl ?>manage-parents"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-people"></i>
@@ -101,8 +101,8 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
                 <!-- Children -->
                 <a
-                    href="<?= $baseUrl ?>children.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>manage-children"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-hearts"></i>

@@ -2,64 +2,66 @@
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-$first_name = "";
-$middle_name = "";
-$last_name = "";
-$email = "";
+    $first_name = "";
+    $middle_name = "";
+    $last_name = "";
+    $email = "";
 
-$errorMessage = "";
-$successMessage = "";
+    $errorMessage = "";
+    $successMessage = "";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $first_name  = trim($_POST["first_name"] ?? '');
-    $middle_name = trim($_POST["middle_name"] ?? '');
-    $last_name   = trim($_POST["last_name"] ?? '');
-    $email       = trim($_POST["email"] ?? '');
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $first_name  = trim($_POST["first_name"] ?? '');
+        $middle_name = trim($_POST["middle_name"] ?? '');
+        $last_name   = trim($_POST["last_name"] ?? '');
+        $email       = trim($_POST["email"] ?? '');
 
-    // Default password (123) na naka-hash at role na "teacher"
-    $default_password = password_hash("123", PASSWORD_DEFAULT);
-    $role = "teacher";
+        // Default password (123) na naka-hash at role na "teacher"
+        $default_password = password_hash("123", PASSWORD_DEFAULT);
+        $role = "teacher";
 
-    // Validate inputs
-    if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email)) {$errorMessage = "All fields are required";
-    } else {
-        // -------------------------------------------------------------
-        // 1. FIRST INSERT: Save to `users` table
-        // -------------------------------------------------------------
-        $sql_user = "INSERT INTO users (first_name, middle_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt_user =$conn->prepare($sql_user);$stmt_user->bind_param("ssssss", $first_name,$middle_name, $last_name,$email, $default_password,$role);
-
-        if ($stmt_user->execute()) {
-            // Kunin ang id na bagong gawa sa `users` table (kung kailangan)
-            $user_id =$stmt_user->insert_id;
-            $stmt_user->close();
-
-            // -------------------------------------------------------------
-            // 2. SECOND INSERT: Save to `teacher` table
-            // -------------------------------------------------------------
-            $sql_teacher = "INSERT INTO teacher (first_name, middle_name, last_name, email, user_id) VALUES (?, ?, ?, ?, ?)";
-            $stmt_teacher =$conn->prepare($sql_teacher);$stmt_teacher->bind_param("ssssi", $first_name,$middle_name, $last_name,$email,$user_id);
-
-            if ($stmt_teacher->execute()) {$stmt_teacher->close();
-
-                // Kapag parehong matagumpay, mag-redirect sa teachers list
-                $_SESSION['status'] = "success";
-                $_SESSION['message'] = "Teacher Added Successfully!";
-                header("Location: index.php");
-                exit();
-            } else {
-                $errorMessage = "Saved to users, but failed to save to teacher table: " . $conn->error;
-                $_SESSION['status'] = "error";
-                $_SESSION['message'] = "Teacher Added Failed!";
-            }
+        // Validate inputs
+        if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email)) {$errorMessage = "All fields are required";
         } else {
-            $errorMessage = "Failed to save user: " . $conn->error;
+            // -------------------------------------------------------------
+            // 1. FIRST INSERT: Save to `users` table
+            // -------------------------------------------------------------
+            $sql_user = "INSERT INTO users (first_name, middle_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt_user =$conn->prepare($sql_user);$stmt_user->bind_param("ssssss", $first_name,$middle_name, $last_name,$email, $default_password,$role);
+
+            if ($stmt_user->execute()) {
+                // Kunin ang id na bagong gawa sa `users` table (kung kailangan)
+                $user_id =$stmt_user->insert_id;
+                $stmt_user->close();
+
+                // -------------------------------------------------------------
+                // 2. SECOND INSERT: Save to `teacher` table
+                // -------------------------------------------------------------
+                $sql_teacher = "INSERT INTO teacher (first_name, middle_name, last_name, email, user_id) VALUES (?, ?, ?, ?, ?)";
+                $stmt_teacher =$conn->prepare($sql_teacher);$stmt_teacher->bind_param("ssssi", $first_name,$middle_name, $last_name,$email,$user_id);
+
+                if ($stmt_teacher->execute()) {$stmt_teacher->close();
+
+                    // Kapag parehong matagumpay, mag-redirect sa teachers list
+                    $_SESSION['status'] = "success";
+                    $_SESSION['message'] = "Teacher Added Successfully!";
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    $errorMessage = "Saved to users, but failed to save to teacher table: " . $conn->error;
+                    $_SESSION['status'] = "error";
+                    $_SESSION['message'] = "Teacher Added Failed!";
+                }
+            } else {
+                $errorMessage = "Failed to save user: " . $conn->error;
+            }
         }
     }
-}
+
+
+$pageTitle = "Create Teacher";
+include '../layout/header.php';
 ?>
-<?php $pageTitle = "Create Teacher"; ?>
-<?php include '../layout/header.php'; ?>
 
 <div>
     <div class="card shadow-sm">

@@ -2,60 +2,25 @@
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-$id = "";
-$first_name = "";
-$middle_name = "";
-$last_name = "";
-$email = "";
+    $id = "";
+    $first_name = "";
+    $middle_name = "";
+    $last_name = "";
+    $email = "";
 
-$errorMessage = "";
+    $errorMessage = "";
 
-// GET: Get teacher data
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // GET: Get teacher data
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    if (!isset($_GET['id'])) {
-        header("Location: index.php");
-        exit();
-    }
+        if (!isset($_GET['id'])) {
+            header("Location: index.php");
+            exit();
+        }
 
-    $id = $_GET['id'];
+        $id = $_GET['id'];
 
-    $sql = "SELECT * FROM teacher WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-
-    $teacher = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if (!$teacher) {
-        header("Location: index.php");
-        exit();
-    }
-
-    $first_name = $teacher['first_name'];
-    $middle_name = $teacher['middle_name'];
-    $last_name = $teacher['last_name'];
-    $email = $teacher['email'];
-}
-
-// POST: Update teacher
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $id = $_POST['id'];
-    $first_name = trim($_POST['first_name'] ?? '');
-    $middle_name = trim($_POST['middle_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-
-    if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email)) {
-
-        $errorMessage = "All fields are required";
-
-    } else {
-
-        // Get user_id
-        $sql = "SELECT user_id FROM teacher WHERE id = ?";
+        $sql = "SELECT * FROM teacher WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -63,29 +28,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $teacher = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        $user_id = $teacher['user_id'];
+        if (!$teacher) {
+            header("Location: index.php");
+            exit();
+        }
 
-        // Update teacher
-        $sql = "UPDATE teacher 
-                SET first_name = ?, middle_name = ?, last_name = ?, email = ?
-                WHERE id = ?";
+        $first_name = $teacher['first_name'];
+        $middle_name = $teacher['middle_name'];
+        $last_name = $teacher['last_name'];
+        $email = $teacher['email'];
+    }
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param(
-            "ssssi",
-            $first_name,
-            $middle_name,
-            $last_name,
-            $email,
-            $id
-        );
+    // POST: Update teacher
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        if ($stmt->execute()) {
+        $id = $_POST['id'];
+        $first_name = trim($_POST['first_name'] ?? '');
+        $middle_name = trim($_POST['middle_name'] ?? '');
+        $last_name = trim($_POST['last_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
 
+        if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email)) {
+
+            $errorMessage = "All fields are required";
+
+        } else {
+
+            // Get user_id
+            $sql = "SELECT user_id FROM teacher WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+
+            $teacher = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            // Update users
-            $sql = "UPDATE users
+            $user_id = $teacher['user_id'];
+
+            // Update teacher
+            $sql = "UPDATE teacher 
                     SET first_name = ?, middle_name = ?, last_name = ?, email = ?
                     WHERE id = ?";
 
@@ -96,29 +77,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $middle_name,
                 $last_name,
                 $email,
-                $user_id
+                $id
             );
 
-            $stmt->execute();
-            $stmt->close();
+            if ($stmt->execute()) {
 
-            $_SESSION['status'] = "success";
-            $_SESSION['message'] = "Teacher Updated Successfully!";
+                $stmt->close();
 
-            header("Location: index.php");
-            exit();
+                // Update users
+                $sql = "UPDATE users
+                        SET first_name = ?, middle_name = ?, last_name = ?, email = ?
+                        WHERE id = ?";
 
-        } else {
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param(
+                    "ssssi",
+                    $first_name,
+                    $middle_name,
+                    $last_name,
+                    $email,
+                    $user_id
+                );
 
-            $errorMessage = "Failed to update teacher";
-            $stmt->close();
+                $stmt->execute();
+                $stmt->close();
+
+                $_SESSION['status'] = "success";
+                $_SESSION['message'] = "Teacher Updated Successfully!";
+
+                header("Location: index.php");
+                exit();
+
+            } else {
+
+                $errorMessage = "Failed to update teacher";
+                $stmt->close();
+            }
         }
     }
-}
-?>
-<?php $pageTitle = "Edit Teacher"; ?>
 
-<?php include '../layout/header.php'; ?>
+
+    $pageTitle = "Edit Teacher";
+    include '../layout/header.php';
+?>
 
 <div>
     <div class="card shadow-sm">
