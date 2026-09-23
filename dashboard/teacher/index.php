@@ -1,2 +1,5 @@
-<?php include('guard.php'); ?>
-Hello <?php echo $_SESSION['fullname'] ?>
+<?php $pageTitle = "Dashboard"; ?>
+<?php include 'layout/header.php'; ?>
+
+
+<?php include 'layout/footer.php'; ?>
