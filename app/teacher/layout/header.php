@@ -42,7 +42,7 @@
                 <!-- Mobile Sidebar Button -->
                 <button
                     type="button"
-                    class="btn header-menu-btn d-lg-none"
+                    class="btn header-menu-btn d-lg-none p-0"
                     id="sidebarToggle"
                 >
                     <i class="bi bi-list"></i>
