@@ -24,7 +24,7 @@ $result = $conn->query($sql);
         ?>
     <?php endif; ?>
     <div class="d-flex align-items-center justify-content-between">
-        <h2 class="fw-bold fs-3">Manage Teacher</h2>
+        <h2 class="fw-bold fs-4">Manage Teacher</h2>
             <a href="create-teacher.php" class="btn btn-primary mb-3">Add Teacher</a>
 
     </div>

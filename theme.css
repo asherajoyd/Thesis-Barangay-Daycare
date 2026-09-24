@@ -159,10 +159,12 @@ body {
 .form-control, 
 .form-select {
   background-color: var(--color-paper) !important;
-  border-color: var(--color-border) !important;
+  /* border-color: var(--color-border) !important; */
   color: var(--color-text) !important;
   border-radius: 12px !important;
-  padding: 8px !important
+  padding: 8px !important;
+  background-image: none !important;
+
 }
 
 .form-control:focus, 

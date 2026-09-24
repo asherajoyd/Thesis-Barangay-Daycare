@@ -18,7 +18,7 @@ $pageTitle = 'Login - Barangay Daycare Center';
 
             <div class="card-body p-4">
 
-                <h1 class="fw-bold fs-3 text-center mb-3">
+                <h1 class="fw-bold fs-4 text-center mb-3">
                     Barangay Daycare Center
                 </h1>
 

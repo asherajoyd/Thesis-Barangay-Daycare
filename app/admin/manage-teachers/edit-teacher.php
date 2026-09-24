@@ -125,7 +125,7 @@ include "../../../api/conn.php";
     <div class="card shadow-sm">
         <div class="card-body p-4">
 
-            <h2 class="fw-bold fs-3">Edit Teacher</h2>
+            <h2 class="fw-bold fs-4">Edit Teacher</h2>
 
             <?php if (!empty($errorMessage)): ?>
 
