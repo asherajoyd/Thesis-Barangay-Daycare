@@ -1,5 +1,5 @@
 <?php 
-    $pageTitle = "Manage Enrollment";
+    $pageTitle = "Archive";
 
     require_once '../guard.php';
     include '../layout/header.php';
@@ -16,7 +16,7 @@ $sql = "SELECT
             c_birthdate,
             status
         FROM enrollment
-        WHERE status = 0
+        WHERE status = 2
         ORDER BY id DESC";
 
 $result = $conn->query($sql);
@@ -46,10 +46,10 @@ $result = $conn->query($sql);
     <?php endif; ?>
 
 
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="fw-bold fs-4">Manage Enrollment</h2>
-        <a href="archive.php" class="btn btn-warning mb-3 px-3" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Archive">
-            <i class="bi bi-archive"></i>
+    <div class="d-flex align-items-center justify-content-between">
+        <h2 class="fw-bold fs-4">Manage Archive</h2>
+        <a href="index.php" class="btn btn-dark mb-3 py-1 px-2" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Back">
+            <i class="bi bi-arrow-left-square"></i>
         </a>
     </div>
 
@@ -109,16 +109,10 @@ $result = $conn->query($sql);
 
                                 <td>
 
-                                    <?php if ($status === 0): ?>
+                                    <?php if ($status === 2): ?>
 
-                                        <span class="badge bg-warning text-dark">
-                                            Pending
-                                        </span>
-
-                                    <?php elseif ($status === 1): ?>
-
-                                        <span class="badge bg-success">
-                                            Approved
+                                        <span class="badge bg-danger">
+                                            Rejected
                                         </span>
 
                                     <?php endif; ?>
@@ -127,33 +121,13 @@ $result = $conn->query($sql);
 
                                 <td>
 
-                                    <!-- View -->
-                                    <a 
-                                        href="view-enrollment.php?id=<?php echo urlencode($row['id']); ?>"
-                                        class="btn btn-outline-secondary btn-sm">
-                                        View
-                                    </a>
-
-
-                                    <?php if ($status === 0): ?>
-
-                                        <!-- Approve -->
                                         <a 
-                                            href="approve-enrollment.php?id=<?php echo urlencode($row['id']); ?>"
+                                            href="restore-enrollment.php?id=<?php echo urlencode($row['id']); ?>"
                                             class="btn btn-success btn-sm"
-                                            onclick="return confirm('Approve this enrollment?');">
-                                            Approve
+                                            onclick="return confirm('Restore this enrollment?');">
+                                            Restore
                                         </a>
 
-                                        <!-- Reject / Reject -->
-                                        <a 
-                                            href="reject-enrollment.php?id=<?php echo urlencode($row['id']); ?>"
-                                            class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Reject this enrollment? This enrollment will be moved to archive');">
-                                            Reject
-                                        </a>
-
-                                    <?php endif; ?>
 
                                 </td>
 
@@ -180,5 +154,9 @@ $result = $conn->query($sql);
     </div>
 
 </div>
+
+
+
+
 
 <?php include '../layout/footer.php'; ?>

@@ -14,7 +14,7 @@ $parents = [
 <section class="py-5">
     <div class="container">
 
-        <div id="formAlert" class="alert d-none mb-3 mb-0" role="alert"></div>
+        
         
         <!-- Header -->
         <div class="card p-4">
@@ -30,6 +30,7 @@ $parents = [
                 </p>
             </div>
         </div>
+
 
 
         <!-- Enrollment Form -->
@@ -266,7 +267,8 @@ $parents = [
                 </div>
             </div>
 
-
+            <div id="formAlert" class="alert d-none mt-3" role="alert"></div>
+            
 
             <!-- Step 1 Buttons -->
             <div id="step1Buttons" class="text-end mt-4">

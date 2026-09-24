@@ -19,7 +19,7 @@ switch ($role) {
         exit;
 
     case 'parent':
-        header('Location: parent/index.php');
+        header('Location: parent/dashboard/');
         exit;
 
     default:

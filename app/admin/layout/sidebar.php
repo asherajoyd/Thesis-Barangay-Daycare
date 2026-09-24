@@ -54,7 +54,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
                 <a
                     href="<?= $baseUrl ?>manage-enrollment/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Enrollment' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-lines-fill"></i>
