@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
 
-        $status = 'pending';
+        $status = 0;
 
 
         /*
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         */
 
         $stmt->bind_param(
-            "issssssssssssssssssss",
+            "isssssssssssssssssssi",
 
             $academic_id,
 

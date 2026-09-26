@@ -84,22 +84,19 @@ $baseUrl = '/ashera/thesis/app/parent/';
                     </span>
                 </a>
 
-            </nav>
+                <!-- Activities -->
+                <a
+                    href="<?= $baseUrl ?>activities.php"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </span>
 
-        </div>
-
-
-        <!-- =====================================================
-             RECORDS
-        ====================================================== -->
-
-        <div class="sidebar-section">
-
-            <span class="sidebar-section-title">
-                RECORDS
-            </span>
-
-            <nav class="sidebar-nav">
+                    <span class="sidebar-link-text">
+                        Activities
+                    </span>
+                </a>
 
                 <!-- Attendance -->
                 <a
@@ -116,38 +113,13 @@ $baseUrl = '/ashera/thesis/app/parent/';
                 </a>
 
 
-                <!-- Activities -->
-                <a
-                    href="<?= $baseUrl ?>activities.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-journal-text"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Activities
-                    </span>
-                </a>
-
-
-                <!-- Health Records -->
-                <a
-                    href="<?= $baseUrl ?>health-records.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-heart-pulse"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Health Records
-                    </span>
-                </a>
+              
 
             </nav>
 
         </div>
+
+
 
     </div>
 

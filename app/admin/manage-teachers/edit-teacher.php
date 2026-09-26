@@ -1,196 +1,361 @@
 <?php
+
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-    $id = "";
-    $first_name = "";
-    $middle_name = "";
-    $last_name = "";
-    $email = "";
 
-    $errorMessage = "";
+// ==========================================================
+// HELPER
+// ==========================================================
 
-    // GET: Get teacher data
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+function e($value)
+{
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 
-        if (!isset($_GET['id'])) {
-            header("Location: index.php");
-            exit();
-        }
 
-        $id = $_GET['id'];
+// ==========================================================
+// FORM STATE
+// ==========================================================
 
-        $sql = "SELECT * FROM teacher WHERE id = ?";
-        $stmt = $conn->prepare($sql);
+$id          = 0;
+$first_name  = "";
+$middle_name = "";
+$last_name   = "";
+$email       = "";
+
+$errorMessage = "";
+
+
+// ==========================================================
+// HANDLE GET — load teacher
+// ==========================================================
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+    $id = (int) ($_GET['id'] ?? 0);
+
+    if ($id <= 0) {
+        header("Location: index.php");
+        exit;
+    }
+
+
+    $stmt = $conn->prepare("
+        SELECT *
+        FROM teacher
+        WHERE id = ?
+        LIMIT 1
+    ");
+
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    $teacher = $stmt->get_result()->fetch_assoc();
+
+    $stmt->close();
+
+
+    if (!$teacher) {
+        header("Location: index.php");
+        exit;
+    }
+
+
+    $first_name  = $teacher['first_name'];
+    $middle_name = $teacher['middle_name'];
+    $last_name   = $teacher['last_name'];
+    $email       = $teacher['email'];
+}
+
+
+// ==========================================================
+// HANDLE POST — update teacher
+// ==========================================================
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $id          = (int) ($_POST['id'] ?? 0);
+    $first_name  = trim($_POST['first_name'] ?? '');
+    $middle_name = trim($_POST['middle_name'] ?? '');
+    $last_name   = trim($_POST['last_name'] ?? '');
+    $email       = trim($_POST['email'] ?? '');
+
+
+    // ----------------------------------------------
+    // Validation
+    // ----------------------------------------------
+
+    if (
+        $id <= 0 ||
+        empty($first_name) ||
+        empty($middle_name) ||
+        empty($last_name) ||
+        empty($email)
+    ) {
+
+        $errorMessage = "All fields are required.";
+
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+        $errorMessage = "Please enter a valid email address.";
+
+    } else {
+
+        // ----------------------------------------------
+        // Check teacher exists
+        // ----------------------------------------------
+
+        $stmt = $conn->prepare("
+            SELECT user_id
+            FROM teacher
+            WHERE id = ?
+            LIMIT 1
+        ");
+
         $stmt->bind_param("i", $id);
         $stmt->execute();
 
         $teacher = $stmt->get_result()->fetch_assoc();
+
         $stmt->close();
 
+
         if (!$teacher) {
-            header("Location: index.php");
-            exit();
-        }
 
-        $first_name = $teacher['first_name'];
-        $middle_name = $teacher['middle_name'];
-        $last_name = $teacher['last_name'];
-        $email = $teacher['email'];
-    }
-
-    // POST: Update teacher
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-        $id = $_POST['id'];
-        $first_name = trim($_POST['first_name'] ?? '');
-        $middle_name = trim($_POST['middle_name'] ?? '');
-        $last_name = trim($_POST['last_name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-
-        if (empty($first_name) || empty($middle_name) || empty($last_name) || empty($email)) {
-
-            $errorMessage = "All fields are required";
+            $errorMessage = "Teacher not found.";
 
         } else {
 
-            // Get user_id
-            $sql = "SELECT user_id FROM teacher WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
+            $user_id = (int) $teacher['user_id'];
 
-            $teacher = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
 
-            $user_id = $teacher['user_id'];
+            // ----------------------------------------------
+            // Check duplicate email (excluding this user)
+            // ----------------------------------------------
 
-            // Update teacher
-            $sql = "UPDATE teacher 
-                    SET first_name = ?, middle_name = ?, last_name = ?, email = ?
-                    WHERE id = ?";
+            $check = $conn->prepare("
+                SELECT id
+                FROM users
+                WHERE email = ?
+                AND id != ?
+                LIMIT 1
+            ");
 
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param(
-                "ssssi",
-                $first_name,
-                $middle_name,
-                $last_name,
-                $email,
-                $id
-            );
+            $check->bind_param("si", $email, $user_id);
+            $check->execute();
+            $check->store_result();
 
-            if ($stmt->execute()) {
 
-                $stmt->close();
+            if ($check->num_rows > 0) {
 
-                // Update users
-                $sql = "UPDATE users
-                        SET first_name = ?, middle_name = ?, last_name = ?, email = ?
-                        WHERE id = ?";
+                $check->close();
 
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param(
-                    "ssssi",
-                    $first_name,
-                    $middle_name,
-                    $last_name,
-                    $email,
-                    $user_id
-                );
-
-                $stmt->execute();
-                $stmt->close();
-
-                $_SESSION['status'] = "success";
-                $_SESSION['message'] = "Teacher Updated Successfully!";
-
-                header("Location: index.php");
-                exit();
+                $errorMessage =
+                    "Another user is already using this email.";
 
             } else {
 
-                $errorMessage = "Failed to update teacher";
-                $stmt->close();
+                $check->close();
+
+
+                // ----------------------------------------------
+                // Update (with transaction)
+                // ----------------------------------------------
+
+                try {
+
+                    $conn->begin_transaction();
+
+
+                    // Update teacher
+                    $stmt = $conn->prepare("
+                        UPDATE teacher
+                        SET
+                            first_name = ?,
+                            middle_name = ?,
+                            last_name = ?,
+                            email = ?
+                        WHERE id = ?
+                    ");
+
+                    $stmt->bind_param(
+                        "ssssi",
+                        $first_name,
+                        $middle_name,
+                        $last_name,
+                        $email,
+                        $id
+                    );
+
+                    $stmt->execute();
+                    $stmt->close();
+
+
+                    // Update users
+                    $stmt = $conn->prepare("
+                        UPDATE users
+                        SET
+                            first_name = ?,
+                            middle_name = ?,
+                            last_name = ?,
+                            email = ?
+                        WHERE id = ?
+                    ");
+
+                    $stmt->bind_param(
+                        "ssssi",
+                        $first_name,
+                        $middle_name,
+                        $last_name,
+                        $email,
+                        $user_id
+                    );
+
+                    $stmt->execute();
+                    $stmt->close();
+
+
+                    $conn->commit();
+
+
+                    $_SESSION['status']  = "success";
+                    $_SESSION['message'] =
+                        "Teacher updated successfully.";
+
+                    header("Location: index.php");
+                    exit;
+
+
+                } catch (Exception $e) {
+
+                    $conn->rollback();
+
+                    $errorMessage =
+                        "Failed to update teacher. Please try again.";
+                }
             }
         }
     }
+}
 
 
-$pageTitle = "Teachers";
+// ==========================================================
+// PAGE
+// ==========================================================
+
+$pageTitle = "Edit Teacher";
+
 include '../layout/header.php';
+
 ?>
 
+
 <div>
+
     <div class="card shadow-sm">
+
         <div class="card-body p-4">
 
-            <h2 class="fw-bold fs-4">Edit Teacher</h2>
+            <h2 class="fw-bold fs-4 mb-3">
+                Edit Teacher
+            </h2>
+
 
             <?php if (!empty($errorMessage)): ?>
 
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <strong>
-                        <?php echo htmlspecialchars($errorMessage); ?>
-                    </strong>
+                <div
+                    class="alert alert-warning alert-dismissible fade show"
+                    role="alert">
 
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="alert"
-                            aria-label="Close">
+                    <strong><?= e($errorMessage) ?></strong>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
                     </button>
+
                 </div>
 
             <?php endif; ?>
 
+
             <form action="edit-teacher.php" method="POST">
 
-                <input type="hidden"
-                       name="id"
-                       value="<?php echo htmlspecialchars($id); ?>">
+                <input
+                    type="hidden"
+                    name="id"
+                    value="<?= (int) $id ?>">
+
 
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        <label class="form-label small">First Name</label>
 
-                        <input type="text"
-                               name="first_name"
-                               class="form-control"
-                               value="<?php echo htmlspecialchars($first_name); ?>"
-                               required>
+                        <label class="form-label small">
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="first_name"
+                            class="form-control"
+                            value="<?= e($first_name) ?>"
+                            required>
+
                     </div>
+
 
                     <div class="col-md-6">
-                        <label class="form-label small">Middle Name</label>
 
-                        <input type="text"
-                               name="middle_name"
-                               class="form-control"
-                               value="<?php echo htmlspecialchars($middle_name); ?>"
-                               required>
+                        <label class="form-label small">
+                            Middle Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="middle_name"
+                            class="form-control"
+                            value="<?= e($middle_name) ?>"
+                            required>
+
                     </div>
+
 
                     <div class="col-md-6">
-                        <label class="form-label small">Last Name</label>
 
-                        <input type="text"
-                               name="last_name"
-                               class="form-control"
-                               value="<?php echo htmlspecialchars($last_name); ?>"
-                               required>
+                        <label class="form-label small">
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="last_name"
+                            class="form-control"
+                            value="<?= e($last_name) ?>"
+                            required>
+
                     </div>
+
 
                     <div class="col-md-6">
-                        <label class="form-label small">Email</label>
 
-                        <input type="email"
-                               name="email"
-                               class="form-control"
-                               placeholder="name@example.com"
-                               value="<?php echo htmlspecialchars($email); ?>"
-                               required>
+                        <label class="form-label small">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="name@example.com"
+                            value="<?= e($email) ?>"
+                            required>
+
                     </div>
+
 
                     <div class="col-12 mt-4">
 
@@ -209,7 +374,10 @@ include '../layout/header.php';
             </form>
 
         </div>
+
     </div>
+
 </div>
+
 
 <?php include '../layout/footer.php'; ?>

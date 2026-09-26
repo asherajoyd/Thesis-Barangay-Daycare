@@ -148,8 +148,6 @@
 
 ?>
 
-<link rel="stylesheet" href="style.css">
-
 <div class="enrollment-page">
 
 
@@ -218,7 +216,7 @@
                <div class="row g-2 w-100">
                  <!-- CURRENT ACADEMIC YEAR -->
 
-                <div class="col-12 col-md-6 col-lg-8 col-xl-9 current-year-chip">
+                <div class="col-12 col-md-6 col-lg-7 col-xl-9 current-year-chip">
 
                     <div class="icon">
                         <i class="bi bi-calendar-check"></i>
@@ -251,7 +249,7 @@
 
                 <!-- FILTER -->
 
-                <form class="filter-form col-12 col-md-6 col-lg-4 col-xl-3"
+                <form class="filter-form col-12 col-md-6 col-lg-5 col-xl-3"
                     method="GET"
                     action="">
 
