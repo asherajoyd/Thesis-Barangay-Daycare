@@ -182,6 +182,3 @@
 
         <!-- Page Content -->
         <div class="dashboard-content">
-
-
-        <?php include 'sidebar.php'; ?>

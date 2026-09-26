@@ -1,5 +1,11 @@
 <?php
 $baseUrl = '/ashera/thesis/app/admin/';
+$classManagementPages = [
+    'Academic Year',
+    'Sections',
+    'Class Schedule',
+];
+$classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, true);
 ?>
 
 <aside class="dashboard-sidebar" id="dashboardSidebar">
@@ -28,7 +34,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
 
         <!-- =====================================================
-             MAIN
+            MAIN
         ====================================================== -->
 
         <div class="sidebar-section">
@@ -39,6 +45,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
             <nav class="sidebar-nav">
 
+                <!-- Dashboard -->
                 <a
                     href="<?= $baseUrl ?>dashboard/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>"
@@ -52,6 +59,8 @@ $baseUrl = '/ashera/thesis/app/admin/';
                     </span>
                 </a>
 
+
+                <!-- Enrollment -->
                 <a
                     href="<?= $baseUrl ?>manage-enrollment/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
@@ -65,9 +74,70 @@ $baseUrl = '/ashera/thesis/app/admin/';
                     </span>
                 </a>
 
+
+                <!-- Class Management -->
+                <div class="sidebar-submenu-wrapper">
+
+                    <button
+                        type="button"
+                        class="sidebar-link sidebar-submenu-toggle <?= $classManagementIsActive ? 'active' : '' ?>"
+                        id="classManagementToggle"
+                        aria-expanded="<?= $classManagementIsActive ? 'true' : 'false' ?>"
+                        aria-controls="classManagementSubmenu"
+                    >
+                        <span class="sidebar-icon">
+                            <i class="bi bi-building"></i>
+                        </span>
+
+                        <span class="sidebar-link-text">
+                            Class Management
+                        </span>
+
+                        <span
+                            class="submenu-arrow <?= $classManagementIsActive ? 'rotate' : '' ?>"
+                            id="classManagementArrow"
+                        >
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
+                    </button>
+
+
+                    <!-- Submenu -->
+                    <div
+                        class="sidebar-submenu <?= $classManagementIsActive ? 'open' : '' ?>"
+                        id="classManagementSubmenu"
+                    >
+
+                        <a
+                            href="<?= $baseUrl ?>school-years/"
+                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'School Year' ? 'active' : '' ?>"
+                        >
+                            <span>Academic Year</span>
+                        </a>
+
+                        <a
+                            href="<?= $baseUrl ?>classes/"
+                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Classes / Sections' ? 'active' : '' ?>"
+                        >
+                            <span>Sections</span>
+                        </a>
+
+                        <a
+                            href="<?= $baseUrl ?>class-schedule/"
+                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Class Schedule' ? 'active' : '' ?>"
+                        >
+                            <span>Class Schedule</span>
+                        </a>
+
+                    </div>
+
+                </div>
+
+
             </nav>
 
         </div>
+
 
 
         <!-- =====================================================
@@ -268,7 +338,8 @@ $baseUrl = '/ashera/thesis/app/admin/';
     </div>
 
 </aside>
-
-
 <!-- Mobile Overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+

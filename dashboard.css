@@ -878,6 +878,154 @@ a {
 
 
 
+/* =========================================================
+   CLASS MANAGEMENT SUBMENU
+========================================================= */
+
+.sidebar-submenu-wrapper {
+    width: 100%;
+}
+
+
+/* Toggle Button */
+
+.sidebar-submenu-toggle {
+    width: 100%;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    text-align: left;
+
+    color: var(--color-text-secondary);
+}
+
+
+/* Make button behave exactly like sidebar links */
+
+.sidebar-submenu-toggle:hover {
+    background-color: var(--color-paper-soft);
+    color: var(--color-primary);
+}
+
+.sidebar-submenu-toggle.active {
+    background-color: rgba(22, 101, 52, 0.10);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+
+/* Text takes available space */
+
+.sidebar-submenu-toggle .sidebar-link-text {
+    flex: 1;
+}
+
+
+/* Arrow */
+
+.submenu-arrow {
+    width: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-left: auto;
+
+    font-size: 11px;
+
+    transition: transform 0.25s ease;
+}
+
+.submenu-arrow.rotate {
+    transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   SUBMENU
+========================================================= */
+
+.sidebar-submenu {
+    display: none;
+
+    margin-top: 4px;
+    margin-left: 22px;
+
+    padding-left: 12px;
+
+    border-left: 1px solid var(--color-border);
+}
+
+.sidebar-submenu.open {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+/* =========================================================
+   SUBMENU LINKS
+========================================================= */
+
+.sidebar-sublink {
+    min-height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 10px;
+
+    color: var(--color-text-secondary);
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.sidebar-sublink:hover {
+    background-color: var(--color-paper-soft);
+
+    color: var(--color-primary);
+}
+
+.sidebar-sublink.active {
+    background-color: rgba(22, 101, 52, 0.08);
+
+    color: var(--color-primary);
+
+    font-weight: 600;
+}
+
+
+/* Keep the submenu out of the way when the desktop sidebar is collapsed. */
+
+.sidebar-collapsed .sidebar-submenu {
+    display: none;
+}
+
+.sidebar-collapsed .submenu-arrow {
+    display: none;
+}
+
+
 
 
 
