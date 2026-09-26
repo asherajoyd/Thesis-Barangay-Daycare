@@ -224,7 +224,7 @@ a {
     background-color: rgba(22, 101, 52, 0.10);
     color: var(--color-primary);
 
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .sidebar-icon {
@@ -910,14 +910,14 @@ a {
 /* Make button behave exactly like sidebar links */
 
 .sidebar-submenu-toggle:hover {
-    background-color: var(--color-paper-soft);
+    background-color: var(--color-paper-soft) !important;
     color: var(--color-primary);
 }
 
 .sidebar-submenu-toggle.active {
-    background-color: rgba(22, 101, 52, 0.10);
+    background-color: inherit;
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 
@@ -1011,7 +1011,7 @@ a {
 
     color: var(--color-primary);
 
-    font-weight: 600;
+    font-weight: 700;
 }
 
 
@@ -1044,11 +1044,8 @@ a {
 }
 
 /* Table Header */
-table thead {
-    background: #f3f4f6 !important;
-}
 .data-table thead th {
-    background-color: var(--color-paper);
+    background-color: #f3f4f6 !important;
     /* color: var(--color-text-secondary); */
     color: black !important; 
 

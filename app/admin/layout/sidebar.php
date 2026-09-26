@@ -109,17 +109,10 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     >
 
                         <a
-                            href="<?= $baseUrl ?>school-years/"
-                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'School Year' ? 'active' : '' ?>"
+                            href="<?= $baseUrl ?>academic-year/"
+                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Academic Year' ? 'active' : '' ?>"
                         >
                             <span>Academic Year</span>
-                        </a>
-
-                        <a
-                            href="<?= $baseUrl ?>classes/"
-                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Classes / Sections' ? 'active' : '' ?>"
-                        >
-                            <span>Sections</span>
                         </a>
 
                         <a
