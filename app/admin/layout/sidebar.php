@@ -145,8 +145,8 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
                 <!-- Attendance -->
                 <a
-                    href="<?= $baseUrl ?>attendance.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>manage-attendance"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Attendance' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-calendar-check"></i>

@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     try {
 
+        /*
+         * Get enrollment information
+         */
         $sql = "SELECT 
                     g_first_name,
                     g_middle_name,
@@ -39,45 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             throw new Exception("Enrollment not found or already processed.");
         }
 
-        
-        $status = 1;
-
-        $sql = "UPDATE enrollment
-                SET status = ?
-                WHERE id = ? AND status = 0";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $status, $id);
-        $stmt->execute();
-        $stmt->close();
-
 
         /*
-         * Insert enrollment ID into children
-         */
-        $sql = "INSERT INTO children (enrollment_id)
-                VALUES (?)";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $stmt->close();
-
-
-        /*
-         * Insert enrollment ID into parent
-         */
-        $sql = "INSERT INTO parent (enrollment_id)
-                VALUES (?)";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $stmt->close();
-
-
-        /*
-         * Create parent/guardian user account
+         * Parent information
          */
         $first_name  = $enrollment['g_first_name'];
         $middle_name = $enrollment['g_middle_name'];
@@ -87,14 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $role = "parent";
 
         // Temporary password
-        $temporaryPassword = "Parent@123";
+        $temporaryPassword = "password123";
         $password = password_hash($temporaryPassword, PASSWORD_DEFAULT);
 
 
         /*
-         * Check if email already exists
+         * Check if parent email already exists
          */
-        $sql = "SELECT id FROM users WHERE email = ?";
+        $sql = "SELECT id
+                FROM users
+                WHERE email = ?";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
@@ -106,8 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt->close();
 
 
-        if (!$existingUser) {
+        /*
+         * Get or create parent user
+         */
+        if ($existingUser) {
 
+            // Existing parent account
+            $user_id = (int) $existingUser['id'];
+
+        } else {
+
+            // Create new parent account
             $sql = "INSERT INTO users (
                         first_name,
                         middle_name,
@@ -131,8 +109,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             );
 
             $stmt->execute();
+
+            // Get newly created users.id
+            $user_id = $conn->insert_id;
+
             $stmt->close();
         }
+
+
+        /*
+         * Approve enrollment
+         */
+        $status = 1;
+
+        $sql = "UPDATE enrollment
+                SET status = ?
+                WHERE id = ? AND status = 0";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $status, $id);
+        $stmt->execute();
+
+        if ($stmt->affected_rows === 0) {
+            throw new Exception("Failed to approve enrollment.");
+        }
+
+        $stmt->close();
+
+
+        /*
+         * Insert child record
+         */
+        $sql = "INSERT INTO children (
+                    enrollment_id,
+                    user_id
+                )
+                VALUES (?, ?)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+
+        /*
+         * Insert parent record
+         */
+        $sql = "INSERT INTO parent (
+                    enrollment_id,
+                    user_id
+                )
+                VALUES (?, ?)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $id, $user_id);
+        $stmt->execute();
+        $stmt->close();
 
 
         /*

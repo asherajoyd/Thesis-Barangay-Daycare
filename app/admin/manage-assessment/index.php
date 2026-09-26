@@ -1,5 +1,5 @@
 <?php 
-    $pageTitle = "Manage Attendance";
+    $pageTitle = "Manage Activity";
     require_once '../guard.php';
     include '../layout/header.php';
     include "../../../api/conn.php";
