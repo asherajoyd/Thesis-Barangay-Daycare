@@ -57,7 +57,7 @@ $result = $conn->query($sql);
 
         <div class="table-responsive">
 
-            <table class="table mb-0 data-table table-striped text-nowrap">
+            <table class="table mb-0 data-table   text-nowrap">
 
                 <thead>
                     <tr>

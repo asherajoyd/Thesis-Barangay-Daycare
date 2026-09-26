@@ -1018,7 +1018,7 @@
         <div class="table-wrapper">
 
             <table
-                class="table table-hover data-table table-striped mb-0"
+                class="table table-hover data-table   mb-0"
                 id="attendanceTable"
             >
 

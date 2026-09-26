@@ -47,8 +47,8 @@ $result = $conn->query($sql);
 
 
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="fw-bold fs-4">Manage Enrollment</h2>
-        <a href="archive.php" class="btn btn-warning mb-3 px-3" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Archive">
+        <h2 class="fw-bold fs-4"><?= $pageTitle ?></h2>
+        <a href="archive.php" class="btn btn-warning px-3" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Archive">
             <i class="bi bi-archive"></i>
         </a>
     </div>
@@ -58,7 +58,7 @@ $result = $conn->query($sql);
 
         <div class="table-responsive">
 
-            <table class="table mb-0 data-table table-striped text-nowrap">
+            <table class="table mb-0 data-table   text-nowrap">
 
                 <thead>
                     <tr>
