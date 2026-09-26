@@ -77,59 +77,9 @@ $baseUrl = '/ashera/thesis/app/teacher/';
         </div>
 
 
-        <!-- =================================================
-             DAYCARE
-        ================================================== -->
-
-        <div class="sidebar-section">
-
-            <span class="sidebar-section-title">
-                DAYCARE
-            </span>
-
-            <nav class="sidebar-nav">
-
-                <!-- PARENTS -->
-
-                <a
-                    href="<?= $baseUrl ?>parents.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>">
-
-                    <span class="sidebar-icon">
-                        <i class="bi bi-people"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Parents
-                    </span>
-
-                </a>
-
-
-                <!-- CHILDREN -->
-
-                <a
-                    href="<?= $baseUrl ?>children.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>">
-
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-hearts"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Children
-                    </span>
-
-                </a>
-
-            </nav>
-
-        </div>
-
-
-        <!-- =================================================
+       <!-- =====================================================
              RECORDS
-        ================================================== -->
+        ====================================================== -->
 
         <div class="sidebar-section">
 
@@ -139,12 +89,11 @@ $baseUrl = '/ashera/thesis/app/teacher/';
 
             <nav class="sidebar-nav">
 
-
-                <!-- ATTENDANCE -->
-
+                <!-- Attendance -->
                 <a
-                    href="<?= $baseUrl ?>../admin/manage-attendance/attendance.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>">
+                    href="<?= $baseUrl ?>manage-attendance"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
+                >
                     <span class="sidebar-icon">
                         <i class="bi bi-calendar-check"></i>
                     </span>
@@ -154,42 +103,25 @@ $baseUrl = '/ashera/thesis/app/teacher/';
                     </span>
                 </a>
 
-                <!-- ASSESSMENT -->
 
-                  <a
-                    href="/ashera/thesis/app/teacher/activities.php"
-                    class="sidebar-link <?= $pageTitle === 'Activities' ? 'active' : '' ?>"
+                <!-- Activities -->
+                <a
+                    href="<?= $baseUrl ?>manage-assessment"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Assessment' ? 'active' : '' ?>"
                 >
-
                     <span class="sidebar-icon">
                         <i class="bi bi-journal-text"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Activities
+                        Assessment
                     </span>
-
-                </a>
-
-                <!-- HEALTH RECORDS -->
-
-                <a
-                    href="<?= $baseUrl ?>health-records.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>">
-
-                    <span class="sidebar-icon">
-                        <i class="bi bi-heart-pulse"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Health Records
-                    </span>
-
                 </a>
 
             </nav>
 
         </div>
+
 
     </div>
 

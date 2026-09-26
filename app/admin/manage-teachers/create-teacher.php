@@ -59,7 +59,7 @@ include "../../../api/conn.php";
     }
 
 
-$pageTitle = "Create Teacher";
+$pageTitle = "Teachers";
 include '../layout/header.php';
 ?>
 

@@ -1,6 +1,6 @@
 <?php
 
-    $pageTitle = "Manage Attendance";
+    $pageTitle = "Attendance";
     require_once '../guard.php';
     include '../../../api/conn.php';
 
@@ -687,18 +687,13 @@
 
 
 
-
-
-
-
-
 <!-- =========================================================
      PAGE HEADING
 ========================================================= -->
 
-<div class="page-heading">
+<div>
 
-    <h1>Attendance</h1>
+    <h2 class="fw-bold fs-4 mb-0">Manage Attendance</h2>
 
     <p>
         Manage student attendance records

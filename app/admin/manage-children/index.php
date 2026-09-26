@@ -1,5 +1,5 @@
 <?php 
-    $pageTitle = "Manage Children";
+    $pageTitle = "Children";
 
     require_once '../guard.php';
     include '../layout/header.php';

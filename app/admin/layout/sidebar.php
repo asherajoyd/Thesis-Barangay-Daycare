@@ -54,7 +54,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
 
                 <a
                     href="<?= $baseUrl ?>manage-enrollment/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Enrollment' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-lines-fill"></i>
@@ -85,7 +85,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
                 <!-- Teachers -->
                 <a
                     href="<?= $baseUrl ?>manage-teachers/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Teachers' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-video3"></i>
@@ -100,7 +100,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
                 <!-- Parents -->
                 <a
                     href="<?= $baseUrl ?>manage-parents"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Parents' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-people"></i>
@@ -115,7 +115,7 @@ $baseUrl = '/ashera/thesis/app/admin/';
                 <!-- Children -->
                 <a
                     href="<?= $baseUrl ?>manage-children"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Children' ? 'active' : '' ?>"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-hearts"></i>
@@ -142,35 +142,6 @@ $baseUrl = '/ashera/thesis/app/admin/';
             </span>
 
             <nav class="sidebar-nav">
-
-                <!-- Attendance -->
-                <a
-                    href="<?= $baseUrl ?>manage-attendance"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Manage Attendance' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-calendar-check"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Attendance
-                    </span>
-                </a>
-
-
-                <!-- Activities -->
-                <a
-                    href="<?= $baseUrl ?>activities.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-journal-text"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Activities
-                    </span>
-                </a>
 
 
                 <!-- Health Records -->

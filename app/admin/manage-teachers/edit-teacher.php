@@ -117,8 +117,8 @@ include "../../../api/conn.php";
     }
 
 
-    $pageTitle = "Edit Teacher";
-    include '../layout/header.php';
+$pageTitle = "Teachers";
+include '../layout/header.php';
 ?>
 
 <div>

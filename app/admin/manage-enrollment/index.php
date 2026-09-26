@@ -1,5 +1,5 @@
 <?php 
-    $pageTitle = "Manage Enrollment";
+    $pageTitle = "Enrollment";
 
     require_once '../guard.php';
     include '../layout/header.php';

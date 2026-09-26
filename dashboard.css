@@ -895,9 +895,10 @@ a {
     width: 100%;
 }
 
-
 /* Table Header */
-
+table thead {
+    background: #f3f4f6 !important;
+}
 .data-table thead th {
     background-color: var(--color-paper);
     /* color: var(--color-text-secondary); */
@@ -1184,29 +1185,9 @@ a {
 }
 
 
-.page-heading {
-
-    margin-bottom: 25px;
-}
-
-
-.page-heading h1 {
-
-    margin: 0;
-
+.heading-content h1,
+.heading-content h2 {
     font-size: 24px;
-
-    font-weight: 700;
-
-    color: #17221c;
-}
-
-
-.page-heading p {
-
-    margin: 7px 0 0;
-
-    font-size: 14px;
-
-    color: var(--muted);
+    font-weight: bold;
+    margin-bottom: 0px;
 }
