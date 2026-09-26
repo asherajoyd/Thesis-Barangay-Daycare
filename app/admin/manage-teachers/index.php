@@ -8,6 +8,10 @@
 <?php
 $sql = "SELECT * FROM teacher";
 $result = $conn->query($sql);
+function e($value)
+    {
+        return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+    }
 ?>
 
 <div>
@@ -23,9 +27,14 @@ $result = $conn->query($sql);
         unset($_SESSION['message']);
         ?>
     <?php endif; ?>
+
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="fw-bold fs-4">Manage Teacher</h2>
-            <a href="create-teacher.php" class="btn btn-primary">Add Teacher</a>
+
+        <h2 class="fw-bold fs-4 mb-0">
+            <?= e($pageTitle) ?>
+        </h2>
+
+        <a href="create-teacher.php" class="btn btn-primary">Add Teacher</a>
 
     </div>
 

@@ -448,7 +448,7 @@ if ($result) {
 
                         <div class="current-year-info">
 
-                            <div class="year-icon">
+                            <div class="icon">
 
                                 <i class="bi bi-calendar-check"></i>
 

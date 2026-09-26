@@ -59,6 +59,21 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
+
+                <!-- Enrollment -->
+                <a
+                    href="<?= $baseUrl ?>manage-enrollment/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Enrollment
+                    </span>
+                </a>
+
                 <!-- Class Management -->
                 <!-- <div class="sidebar-submenu-wrapper">
 
@@ -109,67 +124,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 </div> -->
 
-
-            </nav>
-
-        </div>
-
-
-
-         <!-- =====================================================
-             RECORDS
-        ====================================================== -->
-
-        <div class="sidebar-section">
-
-            <span class="sidebar-section-title">
-                RECORDS
-            </span>
-
-            <nav class="sidebar-nav">
-
-
-                <!-- Enrollment -->
-                <a
-                    href="<?= $baseUrl ?>manage-enrollment/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-lines-fill"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Enrollment
-                    </span>
-                </a>
-                
-                <!-- Class Schedule -->
-                <a
-                    href="<?= $baseUrl ?>class-schedule/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Class Schedule' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-calendar"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Class Schedule
-                    </span>
-                </a>
-
-                <!-- Health Records -->
-                <a
-                    href="<?= $baseUrl ?>health-records"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-heart-pulse"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Health Records
-                    </span>
-                </a>
 
             </nav>
 
@@ -236,6 +190,59 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
         </div>
 
+
+
+
+
+         <!-- =====================================================
+             RECORDS
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                RECORDS
+            </span>
+
+            <nav class="sidebar-nav">
+
+
+                
+                
+                <!-- Class Schedule -->
+                <a
+                    href="<?= $baseUrl ?>class-schedule/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Class Schedule' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-calendar"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Class Schedule
+                    </span>
+                </a>
+
+                <!-- Health Records -->
+                <a
+                    href="<?= $baseUrl ?>health-records"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-heart-pulse"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Health Records
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        
 
        
 

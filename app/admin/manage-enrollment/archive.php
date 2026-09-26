@@ -47,7 +47,7 @@ $result = $conn->query($sql);
 
 
     <div class="d-flex align-items-center justify-content-between">
-        <h2 class="fw-bold fs-4">Manage Archive</h2>
+        <h2 class="fw-bold fs-4">Archive</h2>
         <a href="index.php" class="btn btn-dark mb-3 py-1 px-2" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Back">
             <i class="bi bi-arrow-left-square"></i>
         </a>

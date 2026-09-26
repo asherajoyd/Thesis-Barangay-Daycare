@@ -51,7 +51,7 @@ $result = $conn->query($sql);
 
 
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="fw-bold fs-4">Manage Parents</h2>
+        <h2 class="fw-bold fs-4">Parents</h2>
     </div>
 
 
