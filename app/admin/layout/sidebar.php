@@ -62,7 +62,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Enrollment -->
                 <a
-                    href="<?= $baseUrl ?>manage-enrollment/"
+                    href="<?= $baseUrl ?>enrollment/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -74,55 +74,19 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
-                <!-- Class Management -->
-                <!-- <div class="sidebar-submenu-wrapper">
+                 <!-- Announcement -->
+                <a
+                    href="<?= $baseUrl ?>announcement/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Announcement' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </span>
 
-                    <button
-                        type="button"
-                        class="sidebar-link sidebar-submenu-toggle <?= $classManagementIsActive ? 'active' : '' ?>"
-                        id="classManagementToggle"
-                        aria-expanded="<?= $classManagementIsActive ? 'true' : 'false' ?>"
-                        aria-controls="classManagementSubmenu"
-                    >
-                        <span class="sidebar-icon">
-                            <i class="bi bi-building"></i>
-                        </span>
-
-                        <span class="sidebar-link-text">
-                            Class Management
-                        </span>
-
-                        <span
-                            class="submenu-arrow <?= $classManagementIsActive ? 'rotate' : '' ?>"
-                            id="classManagementArrow"
-                        >
-                            <i class="bi bi-chevron-down"></i>
-                        </span>
-                    </button>
-
-
-                    <div
-                        class="sidebar-submenu <?= $classManagementIsActive ? 'open' : '' ?>"
-                        id="classManagementSubmenu"
-                    >
-
-                        <a
-                            href="<?= $baseUrl ?>academic-year/"
-                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Academic Year' ? 'active' : '' ?>"
-                        >
-                            <span>Academic Year</span>
-                        </a>
-
-                        <a
-                            href="<?= $baseUrl ?>class-schedule/"
-                            class="sidebar-sublink <?= ($pageTitle ?? '') === 'Class Schedule' ? 'active' : '' ?>"
-                        >
-                            <span>Class Schedule</span>
-                        </a>
-
-                    </div>
-
-                </div> -->
+                    <span class="sidebar-link-text">
+                        Announcement
+                    </span>
+                </a>
 
 
             </nav>
@@ -144,7 +108,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Teachers -->
                 <a
-                    href="<?= $baseUrl ?>manage-teachers/"
+                    href="<?= $baseUrl ?>teachers/"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -159,7 +123,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Parents -->
                 <a
-                    href="<?= $baseUrl ?>manage-parents"
+                    href="<?= $baseUrl ?>parents"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -174,7 +138,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Children -->
                 <a
-                    href="<?= $baseUrl ?>manage-children"
+                    href="<?= $baseUrl ?>children"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
@@ -205,23 +169,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
             </span>
 
             <nav class="sidebar-nav">
-
-
-                
-                
-                <!-- Class Schedule -->
-                <a
-                    href="<?= $baseUrl ?>class-schedule/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Class Schedule' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-calendar"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Class Schedule
-                    </span>
-                </a>
 
                 <!-- Health Records -->
                 <a

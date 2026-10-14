@@ -41,8 +41,7 @@ $baseUrl = '/ashera/thesis/app/parent/';
 
                 <a
                     href="<?= $baseUrl ?>dashboard/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>"
-                >
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>">
                     <span class="sidebar-icon">
                         <i class="bi bi-grid-1x2"></i>
                     </span>
@@ -73,8 +72,7 @@ $baseUrl = '/ashera/thesis/app/parent/';
                 <!-- Children -->
                 <a
                     href="<?= $baseUrl ?>children.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
-                >
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>">
                     <span class="sidebar-icon">
                         <i class="bi bi-person-hearts"></i>
                     </span>
@@ -84,25 +82,19 @@ $baseUrl = '/ashera/thesis/app/parent/';
                     </span>
                 </a>
 
-                <!-- Activities -->
                 <a
                     href="<?= $baseUrl ?>activities.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>"
-                >
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>">
                     <span class="sidebar-icon">
                         <i class="bi bi-journal-text"></i>
                     </span>
-
-                    <span class="sidebar-link-text">
-                        Activities
-                    </span>
+                    <span class="sidebar-link-text">Activities</span>
                 </a>
 
                 <!-- Attendance -->
                 <a
                     href="<?= $baseUrl ?>attendance.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
-                >
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>">
                     <span class="sidebar-icon">
                         <i class="bi bi-calendar-check"></i>
                     </span>
@@ -113,7 +105,7 @@ $baseUrl = '/ashera/thesis/app/parent/';
                 </a>
 
 
-              
+
 
             </nav>
 

@@ -38,7 +38,7 @@
 
             <p>
               <i class="bi bi-geo-alt me-2"></i>
-              Dasmariñas City, Cavite
+              Brgy. Sampaloc IV, Dasmariñas City, Cavite
             </p>
           </div>
 

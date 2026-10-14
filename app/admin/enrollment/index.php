@@ -191,12 +191,12 @@
 
         <a
             href="archive.php"
-            class="btn btn-warning px-3"
+            class="btn btn-warning px-2 py-1"
             data-bs-toggle="tooltip"
             data-bs-placement="left"
             data-bs-title="Archive">
 
-            <i class="bi bi-archive"></i>
+            <i class="bi bi-archive fs-6 fw-bolder"></i>
 
         </a>
 
@@ -404,7 +404,7 @@
 
                                     <!-- View -->
                                     <a
-                                        href="view-enrollment.php?id=<?= urlencode($row['id']) ?>"
+                                        href="view.php?id=<?= urlencode($row['id']) ?>"
                                         class="btn btn-outline-secondary btn-sm">
 
                                         View

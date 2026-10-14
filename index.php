@@ -2,8 +2,7 @@
 <?php include('./layout/header.php') ?>
     <section class="py-5 banner">
         <div class="container">
-            busseng!
-
+            Little Daisy Child Development Center
         </div>        
     </section>
 <?php include('./layout/footer.php') ?>

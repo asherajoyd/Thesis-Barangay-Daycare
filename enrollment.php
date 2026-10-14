@@ -14,12 +14,13 @@ $parents = [
 <section class="py-5">
     <div class="container">
 
-        
-        
         <!-- Header -->
         <div class="card p-4">
             <div class="card-body">
-                <span class="fw-bold text-primary ls3">ENROLLMENT</span>
+
+                <span class="fw-bold text-primary ls3">
+                    ENROLLMENT
+                </span>
 
                 <h1 class="fw-bold">
                     Child Enrollment
@@ -28,13 +29,17 @@ $parents = [
                 <p class="text-muted small mb-0">
                     Complete the form below to submit your child's daycare enrollment application.
                 </p>
+
             </div>
         </div>
 
 
-
         <!-- Enrollment Form -->
-        <form id="enrollmentForm" novalidate>
+        <form
+            id="enrollmentForm"
+            enctype="multipart/form-data"
+            novalidate
+        >
 
             <div class="card mt-3">
 
@@ -54,12 +59,16 @@ $parents = [
 
                 <div class="card-body p-4">
 
-                    <!-- STEP 1 -->
+                    <!-- =====================================================
+                         STEP 1
+                    ====================================================== -->
                     <div id="step1">
 
                         <div class="row g-3">
 
+                            <!-- Last Name -->
                             <div class="col-md-4">
+
                                 <label class="form-label small">
                                     Last Name
                                     <span class="text-danger">*</span>
@@ -72,10 +81,13 @@ $parents = [
                                     placeholder="Last name"
                                     required
                                 >
+
                             </div>
 
 
+                            <!-- First Name -->
                             <div class="col-md-4">
+
                                 <label class="form-label small">
                                     First Name
                                     <span class="text-danger">*</span>
@@ -88,10 +100,13 @@ $parents = [
                                     placeholder="First name"
                                     required
                                 >
+
                             </div>
 
 
+                            <!-- Middle Name -->
                             <div class="col-md-4">
+
                                 <label class="form-label small">
                                     Middle Name
                                 </label>
@@ -102,10 +117,13 @@ $parents = [
                                     class="form-control"
                                     placeholder="Middle name"
                                 >
+
                             </div>
 
 
+                            <!-- Gender -->
                             <div class="col-md-6">
+
                                 <label class="form-label small">
                                     Gender
                                     <span class="text-danger">*</span>
@@ -116,6 +134,7 @@ $parents = [
                                     class="form-select"
                                     required
                                 >
+
                                     <option value="" selected disabled>
                                         Select gender
                                     </option>
@@ -127,11 +146,15 @@ $parents = [
                                     <option value="female">
                                         Female
                                     </option>
+
                                 </select>
+
                             </div>
 
 
+                            <!-- Date of Birth -->
                             <div class="col-md-6">
+
                                 <label class="form-label small">
                                     Date of Birth
                                     <span class="text-danger">*</span>
@@ -143,10 +166,13 @@ $parents = [
                                     class="form-control"
                                     required
                                 >
+
                             </div>
 
 
+                            <!-- Address -->
                             <div class="col-12">
+
                                 <label class="form-label small">
                                     Complete Address
                                     <span class="text-danger">*</span>
@@ -159,10 +185,13 @@ $parents = [
                                     placeholder="House No., Street, Barangay, Municipality/City, Province"
                                     required
                                 ></textarea>
+
                             </div>
 
 
+                            <!-- Place of Birth -->
                             <div class="col-12">
+
                                 <label class="form-label small">
                                     Place of Birth
                                     <span class="text-danger">*</span>
@@ -175,14 +204,169 @@ $parents = [
                                     placeholder="Place of birth"
                                     required
                                 >
+
                             </div>
+
+                        <div class="border-top mt-4 pt-4">
+
+                            <h6 class="fw-bold mb-1">
+                                Birth Certificate
+                            </h6>
+
+                            <p class="small text-muted mb-3">
+                                Upload Birth Certificate for the enrollment application.
+                            </p>
+
+
+                            <!-- Document Type -->
+                            <div class="mb-3">
+
+                                <label class="form-label small">
+
+                                    Document Type
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <select
+                                    name="file_type"
+                                    id="fileType"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option value="" selected disabled>
+                                        Select document type
+                                    </option>
+
+                                    <option value="Child Birth Certificate">
+                                        Child Birth Certificate
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- File -->
+                            <div>
+
+                                <label class="form-label small">
+
+                                    Upload Document
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="file_image"
+                                    id="fileImage"
+                                    class="form-control"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                >
+
+                                <div class="form-text">
+                                    Accepted files: JPG, JPEG, PNG, PDF.
+                                    Maximum file size: 5MB.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                         <div class="border-top mt-4 pt-4">
+
+                            <h6 class="fw-bold mb-1">
+                                Yellow Card
+                            </h6>
+
+                            <p class="small text-muted mb-3">
+                                Upload Yellow Card for the enrollment application.
+                            </p>
+
+
+                            <!-- Document Type -->
+                            <div class="mb-3">
+
+                                <label class="form-label small">
+
+                                    Document Type
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <select
+                                    name="file_type"
+                                    id="fileType"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option value="" selected disabled>
+                                        Select document type
+                                    </option>
+
+                                    <option value="yellow-card">
+                                        Yellow Card
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- File -->
+                            <div>
+
+                                <label class="form-label small">
+
+                                    Upload Document
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="file_image"
+                                    id="fileImage"
+                                    class="form-control"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                >
+
+                                <div class="form-text">
+                                    Accepted files: JPG, JPEG, PNG, PDF.
+                                    Maximum file size: 5MB.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
 
                         </div>
 
                     </div>
 
 
-                    <!-- STEP 2 -->
+                    <!-- =====================================================
+                         STEP 2
+                    ====================================================== -->
                     <div id="step2" class="d-none">
 
                         <?php foreach ($parents as $prefix => $title): ?>
@@ -193,29 +377,41 @@ $parents = [
 
                             <div class="row g-3">
 
+                                <!-- First / Middle / Last Name -->
                                 <?php foreach ([
                                     'first_name'  => 'First Name',
-                                    'middle_name' => 'Middle Name',
+                                    'middle_name' => 'Middle Name (optional)',
                                     'last_name'   => 'Last Name'
                                 ] as $field => $label): ?>
 
                                     <?php
+
                                     $required =
                                         $prefix === 'g' &&
-                                        in_array($field, [
-                                            'first_name',
-                                            'last_name'
-                                        ]);
+                                        in_array(
+                                            $field,
+                                            [
+                                                'first_name',
+                                                'last_name'
+                                            ]
+                                        );
+
                                     ?>
 
                                     <div class="col-md-4">
 
                                         <label class="form-label small">
+
                                             <?= $label ?>
 
                                             <?php if ($required): ?>
-                                                <span class="text-danger">*</span>
+
+                                                <span class="text-danger">
+                                                    *
+                                                </span>
+
                                             <?php endif; ?>
+
                                         </label>
 
                                         <input
@@ -231,47 +427,142 @@ $parents = [
                                 <?php endforeach; ?>
 
 
-                                <?php $required = $prefix === 'g'; ?>
+                                <!-- Guardian Email -->
+                                <?php if ($prefix === 'g'): ?>
 
-                                <div class="col-12">
+                                    <div class="col-12">
 
-                                    <label class="form-label small">
-                                        Email
+                                        <label class="form-label small">
 
-                                        <?php if ($required): ?>
-                                            <span class="text-danger">*</span>
-                                        <?php endif; ?>
-                                    </label>
+                                            Email
 
-                                    <input
-                                        type="email"
-                                        name="<?= $prefix ?>_email"
-                                        class="form-control"
-                                        placeholder="name@example.com"
-                                        <?= $required ? 'required' : '' ?>
-                                    >
+                                            <span class="text-danger">
+                                                *
+                                            </span>
 
-                                </div>
+                                        </label>
+
+                                        <input
+                                            type="email"
+                                            name="g_email"
+                                            class="form-control"
+                                            placeholder="name@example.com"
+                                            required
+                                        >
+
+                                    </div>
+
+                                <?php endif; ?>
 
                             </div>
 
                         <?php endforeach; ?>
 
 
+                        <!-- =================================================
+                             SUPPORTING DOCUMENT
+                        ================================================== -->
+
+                        <div class="border-top mt-4 pt-4">
+
+                            <h6 class="fw-bold mb-1">
+                                Proof of Address
+                            </h6>
+
+                            <p class="small text-muted mb-3">
+                                Upload one supporting document of address for the enrollment application.
+                            </p>
+
+
+                            <!-- Document Type -->
+                            <div class="mb-3">
+
+                                <label class="form-label small">
+
+                                    Document Type
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <select
+                                    name="file_type"
+                                    id="fileType"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option value="" selected disabled>
+                                        Select document type
+                                    </option>
+
+                                    <option value="Proof of Address">
+                                        Proof of Address / Utility Bill
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- File -->
+                            <div>
+
+                                <label class="form-label small">
+
+                                    Upload Document
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="file_image"
+                                    id="fileImage"
+                                    class="form-control"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    required
+                                >
+
+                                <div class="form-text">
+                                    Accepted files: JPG, JPEG, PNG, PDF.
+                                    Maximum file size: 5MB.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
                         <p class="small text-muted mt-4 mb-0">
-                            Guardian information is required.
+                            Guardian information and one supporting document are required.
                         </p>
 
                     </div>
 
                 </div>
+
             </div>
 
-            <div id="formAlert" class="alert d-none mt-3" role="alert"></div>
-            
+
+            <!-- Alert -->
+            <div
+                id="formAlert"
+                class="alert d-none mt-3"
+                role="alert"
+            ></div>
+
 
             <!-- Step 1 Buttons -->
-            <div id="step1Buttons" class="text-end mt-4">
+            <div
+                id="step1Buttons"
+                class="text-end mt-4"
+            >
 
                 <button
                     type="button"
@@ -285,15 +576,29 @@ $parents = [
 
 
             <!-- Step 2 Buttons -->
-            <div id="step2Buttons" class="d-none justify-content-between mt-4">
-                <button type="button" id="backBtn" class="btn btn-warning px-4">
+            <div
+                id="step2Buttons"
+                class="d-none justify-content-between mt-4"
+            >
+
+                <button
+                    type="button"
+                    id="backBtn"
+                    class="btn btn-warning px-4"
+                >
                     Back
                 </button>
 
-                <button type="submit" id="submitBtn" class="btn btn-primary px-4">
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="btn btn-primary px-4"
+                >
                     Submit Application
                 </button>
+
             </div>
+
         </form>
 
     </div>
@@ -301,18 +606,29 @@ $parents = [
 
 
 <script>
+
 $(function () {
 
     const form = $('#enrollmentForm');
+
     const step1 = $('#step1');
     const step2 = $('#step2');
+
     const step1Buttons = $('#step1Buttons');
     const step2Buttons = $('#step2Buttons');
+
     const title = $('#stepTitle');
     const description = $('#stepDescription');
+
     const submitBtn = $('#submitBtn');
     const formAlert = $('#formAlert');
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Step Titles
+    |--------------------------------------------------------------------------
+    */
 
     const childTitle = 'Child Information';
 
@@ -324,10 +640,19 @@ $(function () {
     const parentDescription =
         "Provide the contact information of the child's parent or guardian.";
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Show Alert
+    |--------------------------------------------------------------------------
+    */
+
     function showAlert(type, message) {
 
         formAlert
-            .removeClass('d-none alert-success alert-danger alert-warning')
+            .removeClass(
+                'd-none alert-success alert-danger alert-warning'
+            )
             .addClass('alert-' + type)
             .html(message);
 
@@ -337,37 +662,70 @@ $(function () {
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hide Alert
+    |--------------------------------------------------------------------------
+    */
+
     function hideAlert() {
 
         formAlert
             .addClass('d-none')
-            .removeClass('alert-success alert-danger alert-warning')
+            .removeClass(
+                'alert-success alert-danger alert-warning'
+            )
             .html('');
 
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Show Step
+    |--------------------------------------------------------------------------
+    */
 
     function showStep(step) {
 
         const isChild = step === 1;
 
-        step1.toggleClass('d-none', !isChild);
 
-        step2.toggleClass('d-none', isChild);
+        step1.toggleClass(
+            'd-none',
+            !isChild
+        );
+
+        step2.toggleClass(
+            'd-none',
+            isChild
+        );
+
 
         step1Buttons.toggleClass(
             'd-none',
             !isChild
         );
 
+
         step2Buttons
-            .toggleClass('d-none', isChild)
-            .toggleClass('d-flex', !isChild);
+            .toggleClass(
+                'd-none',
+                isChild
+            )
+            .toggleClass(
+                'd-flex',
+                !isChild
+            );
+
 
         title.text(
             isChild
                 ? childTitle
                 : parentTitle
         );
+
 
         description.text(
             isChild
@@ -376,6 +734,13 @@ $(function () {
         );
 
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate Fields
+    |--------------------------------------------------------------------------
+    */
 
     function validateFields(container) {
 
@@ -405,11 +770,21 @@ $(function () {
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Continue
+    |--------------------------------------------------------------------------
+    */
+
     $('#continueBtn').on('click', function () {
 
         hideAlert();
+
         if (validateFields(step1)) {
+
             showStep(2);
+
         } else {
 
             showAlert(
@@ -420,6 +795,13 @@ $(function () {
         }
 
     });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Invalid State
+    |--------------------------------------------------------------------------
+    */
 
     form.on(
         'input change',
@@ -435,10 +817,27 @@ $(function () {
         }
     );
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Back
+    |--------------------------------------------------------------------------
+    */
+
     $('#backBtn').on('click', function () {
+
         hideAlert();
+
         showStep(1);
+
     });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Submit
+    |--------------------------------------------------------------------------
+    */
 
     form.on('submit', function (e) {
 
@@ -446,59 +845,183 @@ $(function () {
 
         hideAlert();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
         if (!validateFields(form)) {
-            showAlert( 'danger', 'Please complete all required fields before submitting.' );
+
+            showAlert(
+                'danger',
+                'Please complete all required fields before submitting.'
+            );
+
             return;
+
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate File Size
+        |--------------------------------------------------------------------------
+        */
+
+        const fileInput = document.getElementById('fileImage');
+
+        if (
+            fileInput.files.length > 0 &&
+            fileInput.files[0].size > 5 * 1024 * 1024
+        ) {
+
+            showAlert(
+                'danger',
+                'The uploaded file must not exceed 5MB.'
+            );
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submit Button
+        |--------------------------------------------------------------------------
+        */
 
         submitBtn
             .prop('disabled', true)
             .text('Submitting...');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FormData
+        |--------------------------------------------------------------------------
+        */
+
+        const formData = new FormData(
+            document.getElementById('enrollmentForm')
+        );
+
+        formData.append(
+            'action',
+            'enrollment'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AJAX
+        |--------------------------------------------------------------------------
+        */
+
         $.ajax({
+
             url: './api/req-enrollment.php',
+
             type: 'POST',
-            data:
-                form.serialize() +
-                '&action=enrollment',
+
+            data: formData,
+
             dataType: 'json',
+
+            processData: false,
+
+            contentType: false,
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success
+            |--------------------------------------------------------------------------
+            */
+
             success: function (response) {
 
                 if (response.status === 'success') {
+
                     showAlert(
                         'success',
                         response.message ||
-                        'Enrollment submitted successfully.'
+                        'Enrollment application submitted successfully.'
                     );
+
+
                     form[0].reset();
+
+
                     form
                         .find('.is-invalid')
                         .removeClass('is-invalid');
+
+
                     showStep(1);
+
                 } else {
+
                     showAlert(
                         'danger',
                         response.message ||
                         'Unable to submit enrollment.'
                     );
+
                 }
+
             },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Error
+            |--------------------------------------------------------------------------
+            */
+
             error: function (xhr) {
+
                 console.log(xhr.responseText);
+
+                let message =
+                    'Something went wrong while submitting the enrollment.';
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+
+                    message = xhr.responseJSON.message;
+
+                }
+
                 showAlert(
                     'danger',
-                    'Something went wrong while submitting the enrollment.'
+                    message
                 );
 
             },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Complete
+            |--------------------------------------------------------------------------
+            */
+
             complete: function () {
+
                 submitBtn
                     .prop('disabled', false)
                     .text('Submit Application');
+
             }
+
         });
+
     });
 
 });
+
 </script>
 
 

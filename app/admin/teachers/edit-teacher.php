@@ -251,121 +251,223 @@ include '../layout/header.php';
 ?>
 
 
+<style>
+    /* Small mobile improvements */
+    @media (max-width: 575.98px) {
+
+        .teacher-form-card {
+            border-radius: 0.75rem;
+        }
+
+        .teacher-header {
+            align-items: flex-start !important;
+        }
+
+        .teacher-header .btn {
+            white-space: nowrap;
+        }
+
+        .teacher-actions {
+            flex-direction: column;
+        }
+
+        .teacher-actions .btn {
+            width: 100%;
+        }
+
+    }
+</style>
+
+
 <div>
 
-    <div class="card shadow-sm">
+    <!-- Header -->
+    <div class="teacher-header d-flex align-items-center
+                justify-content-between gap-2 mb-3">
 
-        <div class="card-body p-4">
+        <div class="min-w-0">
 
-            <h2 class="fw-bold fs-4 mb-3">
+            <h2 class="fw-bold fs-4 mb-0">
                 Edit Teacher
             </h2>
 
+            <small class="text-muted">
+                Update teacher account information
+            </small>
 
-            <?php if (!empty($errorMessage)): ?>
+        </div>
 
-                <div
-                    class="alert alert-warning alert-dismissible fade show"
-                    role="alert">
 
-                    <strong><?= e($errorMessage) ?></strong>
+        <a href="<?= $baseUrl ?>teachers/"
+           class="btn btn-sm btn-light border">
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                        aria-label="Close">
-                    </button>
+            <i class="bi bi-arrow-left me-1"></i>
+
+            <span class="d-none d-sm-inline">
+                Back
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <!-- Error -->
+    <?php if (!empty($errorMessage)): ?>
+
+        <div class="alert alert-danger alert-dismissible fade show
+                    py-2 px-3 small mb-3"
+             role="alert">
+
+            <i class="bi bi-exclamation-circle me-1"></i>
+
+            <?= e($errorMessage) ?>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+
+        </div>
+
+    <?php endif; ?>
+
+
+    <!-- Form Card -->
+    <div class="card teacher-form-card border-0 shadow-sm">
+
+        <div class="card-body p-3 p-md-4">
+
+            <form action="edit-teacher.php"
+                  method="POST"
+                  autocomplete="off">
+
+                <!-- Teacher ID -->
+                <input type="hidden"
+                       name="id"
+                       value="<?= (int) $id ?>">
+
+
+                <!-- Fields -->
+                <div class="row g-3">
+
+                    <!-- First Name -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <label class="form-label small mb-1">
+
+                            First Name
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+                        <input type="text"
+                               name="first_name"
+                               class="form-control"
+                               placeholder="First name"
+                               value="<?= e($first_name) ?>"
+                               autocomplete="given-name"
+                               required>
+
+                    </div>
+
+
+                    <!-- Middle Name -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <label class="form-label small mb-1">
+
+                            Middle Name
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+                        <input type="text"
+                               name="middle_name"
+                               class="form-control"
+                               placeholder="Middle name"
+                               value="<?= e($middle_name) ?>"
+                               autocomplete="additional-name"
+                               required>
+
+                    </div>
+
+
+                    <!-- Last Name -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <label class="form-label small mb-1">
+
+                            Last Name
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+                        <input type="text"
+                               name="last_name"
+                               class="form-control"
+                               placeholder="Last name"
+                               value="<?= e($last_name) ?>"
+                               autocomplete="family-name"
+                               required>
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+
+                        <label class="form-label small mb-1">
+
+                            Email
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+                        <input type="email"
+                               name="email"
+                               class="form-control"
+                               placeholder="name@example.com"
+                               value="<?= e($email) ?>"
+                               autocomplete="email"
+                               required>
+
+                    </div>
 
                 </div>
 
-            <?php endif; ?>
+
+                <!-- Footer -->
+                <div class="border-top mt-4 pt-3">
+
+                    <div class="d-flex flex-column flex-sm-row
+                                align-items-sm-center
+                                justify-content-end gap-3">
+
+                        <div class="teacher-actions d-flex gap-2">
+
+                            <a href="<?= $baseUrl ?>teachers/"
+                               class="btn btn-light border">
+
+                                Cancel
+
+                            </a>
 
 
-            <form action="edit-teacher.php" method="POST">
-
-                <input
-                    type="hidden"
-                    name="id"
-                    value="<?= (int) $id ?>">
+                            <button type="submit"
+                                    class="btn btn-primary">
 
 
-                <div class="row g-3">
+                                Update Teacher
 
-                    <div class="col-md-6">
+                            </button>
 
-                        <label class="form-label small">
-                            First Name
-                        </label>
-
-                        <input
-                            type="text"
-                            name="first_name"
-                            class="form-control"
-                            value="<?= e($first_name) ?>"
-                            required>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label small">
-                            Middle Name
-                        </label>
-
-                        <input
-                            type="text"
-                            name="middle_name"
-                            class="form-control"
-                            value="<?= e($middle_name) ?>"
-                            required>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label small">
-                            Last Name
-                        </label>
-
-                        <input
-                            type="text"
-                            name="last_name"
-                            class="form-control"
-                            value="<?= e($last_name) ?>"
-                            required>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label small">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            name="email"
-                            class="form-control"
-                            placeholder="name@example.com"
-                            value="<?= e($email) ?>"
-                            required>
-
-                    </div>
-
-
-                    <div class="col-12 mt-4">
-
-                        <button type="submit" class="btn btn-primary">
-                            Update
-                        </button>
-
-                        <a href="index.php" class="btn btn-secondary">
-                            Cancel
-                        </a>
+                        </div>
 
                     </div>
 
