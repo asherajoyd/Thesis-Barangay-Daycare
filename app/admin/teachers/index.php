@@ -147,9 +147,6 @@ include '../layout/header.php';
 
 ?>
 
-<link rel="stylesheet" href="style.css">
-
-
 <div class="teachers-page">
 
 
@@ -381,6 +378,14 @@ include '../layout/header.php';
 
 
                                 <td>
+
+                                    <a
+                                        href="view.php?id=<?= (int) $row['id'] ?>"
+                                        class="btn btn-outline-primary btn-sm"
+                                        title="View Teacher">
+                                        View
+
+                                    </a>
 
                                     <a
                                         href="edit-teacher.php?id=<?= urlencode($row['id']) ?>"

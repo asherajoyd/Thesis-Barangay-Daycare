@@ -5,14 +5,13 @@ $pageTitle = "Children";
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-
 // ==========================================================
 // HELPER
 // ==========================================================
 
 function e($value)
 {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 
@@ -23,7 +22,7 @@ function e($value)
 $currentYear = null;
 
 $result = $conn->query("
-    SELECT *
+    SELECT id, academic_year, status
     FROM academicyear
     WHERE status = 1
     ORDER BY id DESC
@@ -36,13 +35,13 @@ if ($result && $result->num_rows > 0) {
 
 
 // ==========================================================
-// GET ALL ACADEMIC YEARS (for filter dropdown)
+// GET ALL ACADEMIC YEARS
 // ==========================================================
 
 $academicYears = [];
 
 $result = $conn->query("
-    SELECT id, academic_year, status
+    SELECT id, academic_year, status, start_date
     FROM academicyear
     ORDER BY
         status DESC,
@@ -58,93 +57,87 @@ if ($result) {
 
 
 // ==========================================================
-// DETERMINE FILTER
+// DETERMINE ACADEMIC YEAR FILTER
 // ==========================================================
 
 $filterAcademicId = isset($_GET['academic_id'])
     ? (int) $_GET['academic_id']
     : 0;
 
-
-// Default: use current active year if no filter selected
+// Default to active academic year
 if ($filterAcademicId <= 0 && $currentYear) {
     $filterAcademicId = (int) $currentYear['id'];
 }
 
-// If still nothing, fall back to the first available year
+// Fallback to first available academic year
 if ($filterAcademicId <= 0 && !empty($academicYears)) {
     $filterAcademicId = (int) $academicYears[0]['id'];
 }
 
 
 // ==========================================================
-// GET CHILDREN (filtered by academic year via enrollment)
+// GET CHILDREN
+// Only approved enrollments: e.status = 1
 // ==========================================================
 
 $children = [];
 
+$sql = "
+    SELECT
+        c.id AS child_id,
+        c.user_id AS parent_user_id,
+        c.enrollment_id,
+
+        e.c_first_name,
+        e.c_middle_name,
+        e.c_last_name,
+        e.c_gender,
+        e.c_birthdate,
+        e.academic_id,
+
+        ay.academic_year,
+
+        u.first_name AS parent_first_name,
+        u.middle_name AS parent_middle_name,
+        u.last_name AS parent_last_name,
+        u.email AS parent_email
+
+    FROM children c
+
+    INNER JOIN enrollment e
+        ON e.id = c.enrollment_id
+
+    LEFT JOIN academicyear ay
+        ON ay.id = e.academic_id
+
+    LEFT JOIN users u
+        ON u.id = c.user_id
+
+    WHERE e.status = 1
+";
+
+// Apply academic year filter
 if ($filterAcademicId > 0) {
-
-    $stmt = $conn->prepare("
-        SELECT
-            c.id,
-            e.id AS enrollment_id,
-            e.c_first_name,
-            e.c_middle_name,
-            e.c_last_name,
-            e.c_gender,
-            e.c_birthdate,
-            e.academic_id,
-            ay.academic_year
-        FROM children c
-        LEFT JOIN enrollment e
-            ON c.enrollment_id = e.id
-        LEFT JOIN academicyear ay
-            ON ay.id = e.academic_id
-        WHERE e.academic_id = ?
-        ORDER BY c.id DESC
-    ");
-
-    $stmt->bind_param("i", $filterAcademicId);
-
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-        $children[] = $row;
-    }
-
-    $stmt->close();
-
-} else {
-
-    // No filter and no academic year → show all
-    $result = $conn->query("
-        SELECT
-            c.id,
-            e.id AS enrollment_id,
-            e.c_first_name,
-            e.c_middle_name,
-            e.c_last_name,
-            e.c_gender,
-            e.c_birthdate,
-            e.academic_id,
-            ay.academic_year
-        FROM children c
-        LEFT JOIN enrollment e
-            ON c.enrollment_id = e.id
-        LEFT JOIN academicyear ay
-            ON ay.id = e.academic_id
-        ORDER BY c.id DESC
-    ");
-
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $children[] = $row;
-        }
-    }
+    $sql .= " AND e.academic_id = ?";
 }
+
+$sql .= " ORDER BY c.id DESC";
+
+$stmt = $conn->prepare($sql);
+
+if ($filterAcademicId > 0) {
+    $stmt->bind_param("i", $filterAcademicId);
+}
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $children[] = $row;
+}
+
+$stmt->close();
 
 
 // ==========================================================
@@ -155,11 +148,7 @@ include '../layout/header.php';
 
 ?>
 
-<link rel="stylesheet" href="style.css">
-
-
 <div class="children-page">
-
 
     <!-- ======================================================
          ALERTS
@@ -168,7 +157,7 @@ include '../layout/header.php';
     <?php if (!empty($_SESSION['message'])): ?>
 
         <div
-            class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show"
+            class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger' ?> alert-dismissible fade show"
             role="alert">
 
             <?= e($_SESSION['message']) ?>
@@ -195,9 +184,11 @@ include '../layout/header.php';
 
     <div class="d-flex align-items-center justify-content-between mb-3">
 
-        <h2 class="fw-bold fs-4 mb-0">
-            <?= e($pageTitle) ?>
-        </h2>
+        <div>
+            <h2 class="fw-bold fs-4 mb-1">
+                <?= e($pageTitle) ?>
+            </h2>
+        </div>
 
     </div>
 
@@ -206,16 +197,15 @@ include '../layout/header.php';
          CURRENT ACADEMIC YEAR + FILTER
          ====================================================== -->
 
-    <div class="card   mb-3">
+    <div class="card mb-3">
+
         <div class="card-body">
 
-             <div class="d-flex justify-content-between">
+            <div class="row g-3 align-items-center">
 
+                <!-- CURRENT ACADEMIC YEAR -->
 
-               <div class="row g-2 w-100">
-                 <!-- CURRENT ACADEMIC YEAR -->
-
-                <div class="col-12 col-md-6 col-lg-7 col-xl-9 current-year-chip">
+                <div class="col-12 col-md-6 col-lg-8 current-year-chip">
 
                     <div class="icon">
                         <i class="bi bi-calendar-check"></i>
@@ -235,7 +225,9 @@ include '../layout/header.php';
 
                             <?php else: ?>
 
-                                <span class="text-muted">None active</span>
+                                <span class="text-muted">
+                                    None active
+                                </span>
 
                             <?php endif; ?>
 
@@ -246,9 +238,10 @@ include '../layout/header.php';
                 </div>
 
 
-                <!-- FILTER -->
+                <!-- ACADEMIC YEAR FILTER -->
 
-                <form class="filter-form col-12 col-md-6 col-lg-5 col-xl-3"
+                <form
+                    class="filter-form col-12 col-md-6 col-lg-4"
                     method="GET"
                     action="">
 
@@ -256,12 +249,10 @@ include '../layout/header.php';
                         for="academic_id"
                         class="filter-label">
 
-                        <i class="bi bi-funnel"></i>
-
-                        Filter:
+                        <i class="bi bi-funnel me-1"></i>
+                        Filter by Academic Year
 
                     </label>
-
 
                     <select
                         name="academic_id"
@@ -286,11 +277,11 @@ include '../layout/header.php';
                     </select>
 
                 </form>
-               </div>
 
             </div>
 
         </div>
+
     </div>
 
 
@@ -300,6 +291,24 @@ include '../layout/header.php';
 
     <div class="card p-0">
 
+        <div class="card-header bg-paper border-bottom p-3">
+
+            <div class="d-flex align-items-center justify-content-between gap-2">
+
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-people text-primary me-2"></i>
+                    Children List
+                </h6>
+
+                <span class="badge bg-paper-soft text-secondary border">
+                    <?= count($children) ?>
+                    record<?= count($children) !== 1 ? 's' : '' ?>
+                </span>
+
+            </div>
+
+        </div>
+
         <div class="table-responsive">
 
             <table class="table mb-0 data-table text-nowrap">
@@ -308,9 +317,11 @@ include '../layout/header.php';
 
                     <tr>
 
-                        <th>ID</th>
+                        <th>Child ID</th>
 
                         <th>Child Name</th>
+
+                        <th>Parent Name</th>
 
                         <th>Gender</th>
 
@@ -324,40 +335,79 @@ include '../layout/header.php';
 
                 </thead>
 
-
                 <tbody>
 
-                    <?php if (count($children) > 0): ?>
+                    <?php if (!empty($children)): ?>
 
                         <?php foreach ($children as $row): ?>
 
                             <tr>
 
+                                <!-- ACTUAL CHILD TABLE ID -->
+
                                 <td>
-                                    <?= e($row['id']) ?>
+                                    <span class="fw-semibold">
+                                        <?= (int) $row['child_id'] ?>
+                                    </span>
                                 </td>
 
 
-                                <td>
+                                <!-- CHILD NAME -->
 
+                                <td>
                                     <?= e(trim(
                                         $row['c_first_name'] . ' ' .
                                         $row['c_middle_name'] . ' ' .
                                         $row['c_last_name']
                                     )) ?>
-
                                 </td>
 
 
-                                <td class="text-capitalize">
-                                    <?= e($row['c_gender']) ?>
-                                </td>
-
+                                <!-- PARENT NAME FROM USERS -->
 
                                 <td>
-                                    <?= date('F d, Y', strtotime($row['c_birthdate'])) ?>
+
+                                    <?php
+                                    $parentName = trim(
+                                        ($row['parent_first_name'] ?? '') . ' ' .
+                                        ($row['parent_middle_name'] ?? '') . ' ' .
+                                        ($row['parent_last_name'] ?? '')
+                                    );
+                                    ?>
+
+                                    <?= e($parentName ?: 'Not available') ?>
+
                                 </td>
 
+
+                                <!-- GENDER -->
+
+                                <td class="text-capitalize">
+                                    <?= e($row['c_gender'] ?: 'Not specified') ?>
+                                </td>
+
+
+                                <!-- BIRTHDATE -->
+
+                                <td>
+
+                                    <?php if (!empty($row['c_birthdate'])): ?>
+
+                                        <?= e(date(
+                                            'F d, Y',
+                                            strtotime($row['c_birthdate'])
+                                        )) ?>
+
+                                    <?php else: ?>
+
+                                        <span class="text-muted">—</span>
+
+                                    <?php endif; ?>
+
+                                </td>
+
+
+                                <!-- ACADEMIC YEAR -->
 
                                 <td>
 
@@ -369,18 +419,23 @@ include '../layout/header.php';
 
                                     <?php else: ?>
 
-                                        <span class="text-muted small">—</span>
+                                        <span class="text-muted small">
+                                            Not assigned
+                                        </span>
 
                                     <?php endif; ?>
 
                                 </td>
 
 
+                                <!-- ACTIONS -->
+
                                 <td>
 
                                     <a
-                                        href="view-child.php?id=<?= urlencode($row['id']) ?>"
-                                        class="btn btn-primary btn-sm">
+                                        href="view.php?id=<?= (int) $row['child_id'] ?>"
+                                        class="btn btn-outline-primary btn-sm"
+                                        title="View Child">
 
                                         View
 
@@ -396,19 +451,29 @@ include '../layout/header.php';
 
                         <tr>
 
-                            <td
-                                colspan="6"
-                                class="text-center text-muted py-4 bg-light">
+                            <td colspan="7" class="text-center py-5">
 
-                                <?php if ($filterAcademicId > 0): ?>
+                                <i class="bi bi-people fs-2 text-muted"></i>
 
-                                    No children found for this academic year.
+                                <h6 class="fw-semibold mt-2">
+                                    No Children Found
+                                </h6>
 
-                                <?php else: ?>
+                                <p class="text-muted small mb-0">
 
-                                    No children available.
+                                    <?php if ($filterAcademicId > 0): ?>
 
-                                <?php endif; ?>
+                                        No children with approved enrollments
+                                        were found for this academic year.
+
+                                    <?php else: ?>
+
+                                        No children with approved enrollments
+                                        are available.
+
+                                    <?php endif; ?>
+
+                                </p>
 
                             </td>
 
@@ -425,6 +490,5 @@ include '../layout/header.php';
     </div>
 
 </div>
-
 
 <?php include '../layout/footer.php'; ?>

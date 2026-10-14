@@ -73,22 +73,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                         Enrollment
                     </span>
                 </a>
-
-                 <!-- Announcement -->
-                <a
-                    href="<?= $baseUrl ?>announcement/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Announcement' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-megaphone"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Announcement
-                    </span>
-                </a>
-
-
             </nav>
 
         </div>
@@ -157,43 +141,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
 
 
-
-         <!-- =====================================================
-             RECORDS
-        ====================================================== -->
-
-        <div class="sidebar-section">
-
-            <span class="sidebar-section-title">
-                RECORDS
-            </span>
-
-            <nav class="sidebar-nav">
-
-                <!-- Health Records -->
-                <a
-                    href="<?= $baseUrl ?>health-records"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Health Records' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-heart-pulse"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Health Records
-                    </span>
-                </a>
-
-            </nav>
-
-        </div>
-
-
-        
-
-       
-
-
         <!-- =====================================================
              MANAGEMENT
         ====================================================== -->
@@ -217,21 +164,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                     <span class="sidebar-link-text">
                         Users
-                    </span>
-                </a>
-
-
-                <!-- Reports -->
-                <a
-                    href="<?= $baseUrl ?>reports.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Reports' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-file-earmark-bar-graph"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Reports
                     </span>
                 </a>
 
