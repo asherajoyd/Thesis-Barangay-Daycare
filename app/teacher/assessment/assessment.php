@@ -1,8 +1,8 @@
 <?php
 $pageTitle = "Activities";
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ashera/thesis/app/guard.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/ashera/thesis/api/conn.php';
+require_once '../guard.php';
+include "../../../api/conn.php";
 
 // Get the logged-in parent's user ID.
 // This assumes children.user_id stores the parent's user ID.
@@ -59,7 +59,7 @@ function activityEscape($value) {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-include $_SERVER['DOCUMENT_ROOT'] . '/ashera/thesis/app/layout/header.php';
+include '../layout/header.php';
 
 ?>
 
@@ -314,4 +314,4 @@ include $_SERVER['DOCUMENT_ROOT'] . '/ashera/thesis/app/layout/header.php';
 
 </div>
 
-<?php include __DIR__ . '/../../layout/footer.php'; ?>
+<?php include '../layout/footer.php'; ?>

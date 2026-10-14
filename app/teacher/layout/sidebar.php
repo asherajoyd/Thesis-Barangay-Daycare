@@ -1,5 +1,5 @@
 <?php
-$baseUrl = '/ashera/thesis/app/admin/';
+$baseUrl = '/ashera/thesis/app/teacher/';
 $classManagementPages = [
     'Academic Year',
     'Sections',
@@ -55,20 +55,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                     <span class="sidebar-link-text">
                         Dashboard
-                    </span>
-                </a>
-
-
-                <!-- Enrollment -->
-                <a
-                    href="<?= $baseUrl ?>enrollment/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-lines-fill"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Enrollment
                     </span>
                 </a>
 
