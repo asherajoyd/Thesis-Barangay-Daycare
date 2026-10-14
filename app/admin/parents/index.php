@@ -410,8 +410,15 @@ include '../layout/header.php';
                                         class="btn btn-outline-primary btn-sm"
                                         title="View Parent">
 
-                                        <i class="bi bi-eye me-1"></i>
                                         View
+
+                                    </a>
+
+                                    <a
+                                        href="edit.php?id=<?= (int) $row['parent_id'] ?>"
+                                        class="btn btn-warning btn-sm"
+                                        title="Edit Parent">
+                                        Edit
 
                                     </a>
 

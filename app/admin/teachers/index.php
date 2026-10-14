@@ -295,11 +295,31 @@ include '../layout/header.php';
 
 
     <!-- ======================================================
-         TEACHERS TABLE
-         ====================================================== -->
+     TEACHERS TABLE
+     ====================================================== -->
 
     <div class="card p-0">
 
+        <!-- CARD HEADER -->
+        <div class="card-header bg-paper border-bottom p-3">
+
+            <div class="d-flex align-items-center justify-content-between gap-2">
+
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-person-workspace text-primary me-2"></i>
+                    Teachers
+                </h6>
+
+                <span class="badge bg-paper-soft text-secondary border">
+                    <?= count($teachers) ?>
+                    record<?= count($teachers) !== 1 ? 's' : '' ?>
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
         <div class="table-responsive">
 
             <table class="table mb-0 data-table text-nowrap">
@@ -307,59 +327,53 @@ include '../layout/header.php';
                 <thead>
 
                     <tr>
-
-                        <th>ID</th>
-
+                        <th>Teacher ID</th>
                         <th>First Name</th>
-
                         <th>Middle Name</th>
-
                         <th>Last Name</th>
-
                         <th>Email</th>
-
                         <th>Academic Year</th>
-
                         <th>Actions</th>
-
                     </tr>
 
                 </thead>
 
-
                 <tbody>
 
-                    <?php if (count($teachers) > 0): ?>
+                    <?php if (!empty($teachers)): ?>
 
                         <?php foreach ($teachers as $row): ?>
 
                             <tr>
 
+                                <!-- TEACHER ID -->
                                 <td>
-                                    <?= e($row['id']) ?>
+                                    <span class="fw-semibold">
+                                        <?= (int) $row['id'] ?>
+                                    </span>
                                 </td>
 
-
+                                <!-- FIRST NAME -->
                                 <td>
                                     <?= e($row['first_name']) ?>
                                 </td>
 
-
+                                <!-- MIDDLE NAME -->
                                 <td>
-                                    <?= e($row['middle_name']) ?>
+                                    <?= e($row['middle_name'] ?: '—') ?>
                                 </td>
 
-
+                                <!-- LAST NAME -->
                                 <td>
                                     <?= e($row['last_name']) ?>
                                 </td>
 
-
+                                <!-- EMAIL -->
                                 <td>
                                     <?= e($row['email']) ?>
                                 </td>
 
-
+                                <!-- ACADEMIC YEAR -->
                                 <td>
 
                                     <?php if (!empty($row['academic_year'])): ?>
@@ -370,40 +384,48 @@ include '../layout/header.php';
 
                                     <?php else: ?>
 
-                                        <span class="text-muted small">—</span>
+                                        <span class="text-muted small">
+                                            Not assigned
+                                        </span>
 
                                     <?php endif; ?>
 
                                 </td>
 
-
+                                <!-- ACTIONS -->
                                 <td>
 
-                                    <a
-                                        href="view.php?id=<?= (int) $row['id'] ?>"
-                                        class="btn btn-outline-primary btn-sm"
-                                        title="View Teacher">
-                                        View
+                                    <div class="d-flex align-items-center gap-1">
 
-                                    </a>
+                                        <a
+                                            href="view.php?id=<?= (int) $row['id'] ?>"
+                                            class="btn btn-outline-primary btn-sm"
+                                            title="View Teacher">
 
-                                    <a
-                                        href="edit-teacher.php?id=<?= urlencode($row['id']) ?>"
-                                        class="btn btn-warning btn-sm">
+                                            View
 
-                                        Edit
+                                        </a>
 
-                                    </a>
+                                        <a
+                                            href="edit-teacher.php?id=<?= (int) $row['id'] ?>"
+                                            class="btn btn-warning btn-sm"
+                                            title="Edit Teacher">
 
+                                            Edit
 
-                                    <a
-                                        href="delete-teacher.php?id=<?= urlencode($row['id']) ?>"
-                                        class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Delete this teacher?');">
+                                        </a>
 
-                                        Delete
+                                        <a
+                                            href="delete-teacher.php?id=<?= (int) $row['id'] ?>"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Delete this teacher?');"
+                                            title="Delete Teacher">
 
-                                    </a>
+                                            Delete
+
+                                        </a>
+
+                                    </div>
 
                                 </td>
 
@@ -413,21 +435,31 @@ include '../layout/header.php';
 
                     <?php else: ?>
 
+                        <!-- EMPTY STATE -->
                         <tr>
 
-                            <td
-                                colspan="7"
-                                class="text-center text-muted py-4 bg-light">
+                            <td colspan="7" class="text-center py-5">
 
-                                <?php if ($filterAcademicId > 0): ?>
+                                <i class="bi bi-person-workspace fs-2 text-muted"></i>
 
-                                    No teachers found for this academic year.
+                                <h6 class="fw-semibold mt-2">
+                                    No Teachers Found
+                                </h6>
 
-                                <?php else: ?>
+                                <p class="text-muted small mb-0">
 
-                                    No teachers available.
+                                    <?php if ($filterAcademicId > 0): ?>
 
-                                <?php endif; ?>
+                                        No teachers were found for the selected
+                                        academic year.
+
+                                    <?php else: ?>
+
+                                        No teachers are currently available.
+
+                                    <?php endif; ?>
+
+                                </p>
 
                             </td>
 

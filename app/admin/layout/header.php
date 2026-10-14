@@ -157,18 +157,7 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="settings.php">
-                                <i class="bi bi-gear"></i>
-                                Settings
-                            </a>
-                        </li>
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right me-2"></i> Sign Out </a>
+                            <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right"></i> Sign Out </a>
                         </li>
 
                     </ul>

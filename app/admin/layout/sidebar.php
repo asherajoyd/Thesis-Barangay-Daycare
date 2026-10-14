@@ -155,7 +155,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Users -->
                 <a
-                    href="<?= $baseUrl ?>users.php"
+                    href="<?= $baseUrl ?>users"
                     class="sidebar-link <?= ($pageTitle ?? '') === 'Users' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
