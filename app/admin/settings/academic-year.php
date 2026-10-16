@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $check = $conn->prepare("
             SELECT id
-            FROM academicyear
+            FROM academic_year
             WHERE academic_year = ?
             LIMIT 1
         ");
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
 
             $stmt = $conn->prepare("
-                INSERT INTO academicyear
+                INSERT INTO academic_year
                 (
                     academic_year,
                     start_date,
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $check = $conn->prepare("
             SELECT academic_year
-            FROM academicyear
+            FROM academic_year
             WHERE id = ?
             LIMIT 1
         ");
@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
             $stmt = $conn->prepare("
-                UPDATE academicyear
+                UPDATE academic_year
                 SET status = 0
                 WHERE status = 1
                 AND id != ?
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
             $stmt = $conn->prepare("
-                UPDATE academicyear
+                UPDATE academic_year
                 SET status = 1
                 WHERE id = ?
             ");
@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $check = $conn->prepare("
             SELECT id
-            FROM academicyear
+            FROM academic_year
             WHERE academic_year = ?
             AND id != ?
             LIMIT 1
@@ -308,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         $stmt = $conn->prepare("
-            UPDATE academicyear
+            UPDATE academic_year
             SET
                 academic_year = ?,
                 start_date = ?,
@@ -354,7 +354,7 @@ $currentYear = null;
 
 $result = $conn->query("
     SELECT *
-    FROM academicyear
+    FROM academic_year
     WHERE status = 1
     ORDER BY id DESC
     LIMIT 1
@@ -374,7 +374,7 @@ $academicYears = [];
 
 $result = $conn->query("
     SELECT *
-    FROM academicyear
+    FROM academic_year
     ORDER BY
         status DESC,
         start_date DESC,

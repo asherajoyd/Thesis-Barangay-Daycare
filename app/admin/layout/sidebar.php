@@ -1,11 +1,7 @@
 <?php
 $baseUrl = '/ashera/thesis/app/admin/';
-$classManagementPages = [
-    'Academic Year',
-    'Sections',
-    'Class Schedule',
-];
-$classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, true);
+
+$currentPage = $pageTitle ?? '';
 ?>
 
 <aside class="dashboard-sidebar" id="dashboardSidebar">
@@ -34,7 +30,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
 
         <!-- =====================================================
-            MAIN
+             MAIN
         ====================================================== -->
 
         <div class="sidebar-section">
@@ -48,7 +44,7 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 <!-- Dashboard -->
                 <a
                     href="<?= $baseUrl ?>dashboard/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Dashboard' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-grid-1x2"></i>
@@ -60,39 +56,10 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 </a>
 
 
-                <!-- Enrollment -->
-                <a
-                    href="<?= $baseUrl ?>enrollment/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Enrollment' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-lines-fill"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Enrollment
-                    </span>
-                </a>
-
-                <!-- Assign Classes -->
-                <a
-                    href="<?= $baseUrl ?>enrollment/assign-class.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Assign Classes' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-check-fill"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Assign Classes
-                    </span>
-                </a>
-
-
                 <!-- Announcement -->
                 <a
                     href="<?= $baseUrl ?>announcement/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Announcement' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Announcement' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-megaphone"></i>
@@ -100,6 +67,52 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                     <span class="sidebar-link-text">
                         Announcement
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- =====================================================
+             ENROLLMENT
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                ENROLLMENT
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Enrollments -->
+                <a
+                    href="<?= $baseUrl ?>enrollment/"
+                    class="sidebar-link <?= $currentPage === 'Enrollment' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Enrollments
+                    </span>
+                </a>
+
+
+                <!-- Assign Classes -->
+                <a
+                    href="<?= $baseUrl ?>enrollment/assign-class.php"
+                    class="sidebar-link <?= $currentPage === 'Assign Classes' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-check-fill"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Assign Classes
                     </span>
                 </a>
 
@@ -120,25 +133,25 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
             <nav class="sidebar-nav">
 
-                <!-- Teachers -->
+                <!-- Children -->
                 <a
-                    href="<?= $baseUrl ?>teachers/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Teachers' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>children/"
+                    class="sidebar-link <?= $currentPage === 'Children' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-person-video3"></i>
+                        <i class="bi bi-person-hearts"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Teachers
+                        Children
                     </span>
                 </a>
 
 
                 <!-- Parents -->
                 <a
-                    href="<?= $baseUrl ?>parents"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Parents' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>parents/"
+                    class="sidebar-link <?= $currentPage === 'Parents' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-people"></i>
@@ -150,17 +163,17 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 </a>
 
 
-                <!-- Children -->
+                <!-- Teachers -->
                 <a
-                    href="<?= $baseUrl ?>children"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>teachers/"
+                    class="sidebar-link <?= $currentPage === 'Teachers' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-person-hearts"></i>
+                        <i class="bi bi-person-video3"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Children
+                        Teachers
                     </span>
                 </a>
 
@@ -169,16 +182,14 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
         </div>
 
 
-
-
-         <!-- =====================================================
-             Schedule
+        <!-- =====================================================
+             SCHEDULE
         ====================================================== -->
 
         <div class="sidebar-section">
 
             <span class="sidebar-section-title">
-                Schedule
+                SCHEDULE
             </span>
 
             <nav class="sidebar-nav">
@@ -186,10 +197,10 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 <!-- Sessions -->
                 <a
                     href="<?= $baseUrl ?>sessions/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Sessions' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Sessions' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-clipboard-minus"></i>
+                        <i class="bi bi-clock-history"></i>
                     </span>
 
                     <span class="sidebar-link-text">
@@ -201,10 +212,10 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 <!-- Routines -->
                 <a
                     href="<?= $baseUrl ?>routines/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Routines' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Routines' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-calendar-event"></i>
+                        <i class="bi bi-list-check"></i>
                     </span>
 
                     <span class="sidebar-link-text">
@@ -216,10 +227,10 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                 <!-- Classes -->
                 <a
                     href="<?= $baseUrl ?>classes/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Classes' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Classes' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-calendar-range"></i>
+                        <i class="bi bi-door-open"></i>
                     </span>
 
                     <span class="sidebar-link-text">
@@ -227,29 +238,55 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
+            </nav>
+
+        </div>
+
+
+        <!-- =====================================================
+             ATTENDANCE
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                ATTENDANCE
+            </span>
+
+            <nav class="sidebar-nav">
+
                 <!-- Attendance -->
                 <a
                     href="<?= $baseUrl ?>attendance/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
+                    class="sidebar-link <?= $currentPage === 'Attendance' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-file-earmark-check"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Attendance
+                        Record Attendance
                     </span>
                 </a>
 
 
+                <!-- Attendance History -->
+                <a
+                    href="<?= $baseUrl ?>attendance/history.php"
+                    class="sidebar-link <?= $currentPage === 'Attendance History' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </span>
 
+                    <span class="sidebar-link-text">
+                        History
+                    </span>
+                </a>
 
             </nav>
 
         </div>
-
-
-
 
 
         <!-- =====================================================
@@ -266,8 +303,8 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Users -->
                 <a
-                    href="<?= $baseUrl ?>users"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Users' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>users/"
+                    class="sidebar-link <?= $currentPage === 'Users' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-gear"></i>
@@ -297,8 +334,8 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
 
                 <!-- Settings -->
                 <a
-                    href="<?= $baseUrl ?>settings"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Settings' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>settings/"
+                    class="sidebar-link <?= $currentPage === 'Settings' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
                         <i class="bi bi-gear"></i>
@@ -342,8 +379,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
     </div>
 
 </aside>
+
 <!-- Mobile Overlay -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-
-
