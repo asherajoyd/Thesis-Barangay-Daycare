@@ -183,6 +183,37 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
+
+                <!-- Routines -->
+                <a
+                    href="<?= $baseUrl ?>routines/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Routines' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Routines
+                    </span>
+                </a>
+
+
+                <!-- Classes -->
+                <a
+                    href="<?= $baseUrl ?>classes/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Classes' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-calendar-range"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Classes
+                    </span>
+                </a>
+
+
             </nav>
 
         </div>
