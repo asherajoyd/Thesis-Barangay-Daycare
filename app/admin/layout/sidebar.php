@@ -73,6 +73,21 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                         Enrollment
                     </span>
                 </a>
+
+
+                <!-- Announcement -->
+                <a
+                    href="<?= $baseUrl ?>announcement/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Announcement' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Announcement
+                    </span>
+                </a>
             </nav>
 
         </div>
