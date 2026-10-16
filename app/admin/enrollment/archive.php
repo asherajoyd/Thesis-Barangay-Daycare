@@ -1,64 +1,62 @@
-<?php 
-    $pageTitle = "Archive";
-
-    require_once '../guard.php';
-    include '../layout/header.php';
-    include "../../../api/conn.php";
-?>
-
 <?php
-$sql = "SELECT 
-            id,
-            c_first_name,
-            c_middle_name,
-            c_last_name,
-            c_gender,
-            c_birthdate,
-            status
-        FROM enrollment
-        WHERE status = 2
-        ORDER BY id DESC";
+
+$pageTitle = "Archive";
+
+require_once '../guard.php';
+include '../layout/header.php';
+include "../../../api/conn.php";
+
+
+function e($value)
+{
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+$sql = "
+    SELECT
+        e.id,
+        e.status,
+        c.first_name,
+        c.middle_name,
+        c.last_name,
+        c.gender,
+        c.birthdate
+    FROM enrollment e
+    INNER JOIN children c ON c.id = e.child_id
+    WHERE e.status = 'rejected'
+    ORDER BY e.id DESC
+";
 
 $result = $conn->query($sql);
+
 ?>
 
 <div>
 
     <?php if (!empty($_SESSION['message'])): ?>
 
-        <div class="fw-semibold alert alert-<?php echo ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-
-            <?php echo htmlspecialchars($_SESSION['message']); ?>
-
-            <button 
-                type="button" 
-                class="btn-close" 
-                data-bs-dismiss="alert">
-            </button>
-
+        <div class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+            <?= e($_SESSION['message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <?php
-        unset($_SESSION['status']);
-        unset($_SESSION['message']);
-        ?>
+        <?php unset($_SESSION['status'], $_SESSION['message']); ?>
 
     <?php endif; ?>
 
 
     <div class="d-flex align-items-center justify-content-between">
         <h2 class="fw-bold fs-4">Archive</h2>
-        <a href="<?= $baseUrl ?>enrollment/" class="btn btn-dark mb-3 py-1 px-2" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Back">
+        <a href="<?= $baseUrl ?>enrollment/" class="btn btn-dark mb-3 py-1 px-2"
+           data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Back">
             <i class="bi bi-arrow-left-square"></i>
         </a>
     </div>
 
 
     <div class="card p-0">
-
         <div class="table-responsive">
-
-            <table class="table mb-0 data-table   text-nowrap">
+            <table class="table mb-0 data-table text-nowrap">
 
                 <thead>
                     <tr>
@@ -77,58 +75,32 @@ $result = $conn->query($sql);
 
                         <?php while ($row = $result->fetch_assoc()): ?>
 
-                            <?php
-                            $status = (int) $row['status'];
-                            ?>
-
                             <tr>
 
+                                <td><?= e($row['id']) ?></td>
+
                                 <td>
-                                    <?php echo htmlspecialchars($row['id']); ?>
+                                    <?= e(trim(
+                                        $row['first_name'] . ' ' .
+                                        $row['middle_name'] . ' ' .
+                                        $row['last_name']
+                                    )) ?>
+                                </td>
+
+                                <td class="text-capitalize fw-bold"><?= e($row['gender']) ?></td>
+
+                                <td><?= date('F d, Y', strtotime($row['birthdate'])) ?></td>
+
+                                <td>
+                                    <span class="badge bg-danger">Rejected</span>
                                 </td>
 
                                 <td>
-                                    <?php
-                                    echo htmlspecialchars(
-                                        trim(
-                                            $row['c_first_name'] . ' ' .
-                                            $row['c_middle_name'] . ' ' .
-                                            $row['c_last_name']
-                                        )
-                                    );
-                                    ?>
-                                </td>
-
-                                <td class="text-capitalize fw-bold">
-                                    <?php echo htmlspecialchars($row['c_gender']); ?>
-                                </td>
-
-                                <td>
-                                    <?php echo date('F d, Y', strtotime($row['c_birthdate'])); ?>
-                                </td>
-
-                                <td>
-
-                                    <?php if ($status === 2): ?>
-
-                                        <span class="badge bg-danger">
-                                            Rejected
-                                        </span>
-
-                                    <?php endif; ?>
-
-                                </td>
-
-                                <td>
-
-                                        <a 
-                                            href="restore-enrollment.php?id=<?php echo urlencode($row['id']); ?>"
-                                            class="btn btn-success btn-sm"
-                                            onclick="return confirm('Restore this enrollment?');">
-                                            Restore
-                                        </a>
-
-
+                                    <a href="restore-enrollment.php?id=<?= urlencode($row['id']) ?>"
+                                       class="btn btn-success btn-sm"
+                                       onclick="return confirm('Restore this enrollment?');">
+                                        Restore
+                                    </a>
                                 </td>
 
                             </tr>
@@ -148,15 +120,10 @@ $result = $conn->query($sql);
                 </tbody>
 
             </table>
-
         </div>
-
     </div>
 
 </div>
-
-
-
 
 
 <?php include '../layout/footer.php'; ?>

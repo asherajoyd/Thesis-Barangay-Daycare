@@ -1,36 +1,73 @@
 <?php
+
 require_once '../guard.php';
 include "../../../api/conn.php";
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    $id = $_GET['id'];
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+    if (!$id || $id <= 0) {
+
+        $_SESSION['status'] = "danger";
+        $_SESSION['message'] = "Invalid teacher ID.";
+
+        header("Location: index.php");
+        exit();
+    }
 
     // Get user_id
-    $sql = "SELECT user_id FROM teacher WHERE id = ?";
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare("
+        SELECT user_id FROM teacher WHERE id = ? LIMIT 1
+    ");
+
     $stmt->bind_param("i", $id);
     $stmt->execute();
-
     $teacher = $stmt->get_result()->fetch_assoc();
-    $user_id = $teacher['user_id'];
+    $stmt->close();
 
-    // Delete teacher
-    $sql = "DELETE FROM teacher WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
 
-    // Delete user
-    $sql = "DELETE FROM users WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
+    if (!$teacher) {
 
-    $_SESSION['status'] = "success";
-    $_SESSION['message'] = "Teacher Deleted Successfully!";
+        $_SESSION['status'] = "danger";
+        $_SESSION['message'] = "Teacher not found.";
+
+        header("Location: index.php");
+        exit();
+    }
+
+
+    $user_id = (int) $teacher['user_id'];
+
+
+    try {
+
+        $conn->begin_transaction();
+
+        // Delete user (CASCADE na sa teacher + teacher_assignment)
+        $stmt = $conn->prepare("
+            DELETE FROM users
+            WHERE id = ? AND role = 'teacher'
+        ");
+
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $conn->commit();
+
+        $_SESSION['status'] = "success";
+        $_SESSION['message'] = "Teacher deleted successfully!";
+
+    } catch (Exception $e) {
+
+        $conn->rollback();
+
+        $_SESSION['status'] = "danger";
+        $_SESSION['message'] = "Failed to delete teacher.";
+    }
 
     header("Location: index.php");
     exit();
 }
-?>

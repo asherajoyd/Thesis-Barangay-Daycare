@@ -5,9 +5,6 @@ $pageTitle = "Parents";
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-// ==========================================================
-// HELPER
-// ==========================================================
 
 function e($value)
 {
@@ -23,8 +20,8 @@ $currentYear = null;
 
 $result = $conn->query("
     SELECT id, academic_year, status
-    FROM academicyear
-    WHERE status = 1
+    FROM academic_year
+    WHERE status = 'active'
     ORDER BY id DESC
     LIMIT 1
 ");
@@ -42,7 +39,7 @@ $academicYears = [];
 
 $result = $conn->query("
     SELECT id, academic_year, status, start_date
-    FROM academicyear
+    FROM academic_year
     ORDER BY
         status DESC,
         start_date DESC,
@@ -64,62 +61,65 @@ $filterAcademicId = isset($_GET['academic_id'])
     ? (int) $_GET['academic_id']
     : 0;
 
-// Default to active academic year
 if ($filterAcademicId <= 0 && $currentYear) {
     $filterAcademicId = (int) $currentYear['id'];
 }
 
-// Fallback to first available academic year
 if ($filterAcademicId <= 0 && !empty($academicYears)) {
     $filterAcademicId = (int) $academicYears[0]['id'];
 }
 
 
 // ==========================================================
-// GET PARENTS / GUARDIANS
-// Only approved enrollments: e.status = 1
+// GET PARENTS
+// Source: users (role=parent)
+// Link: children (user_id) → enrollment (child_id) → academic_year
+// Only approved enrollments
 // ==========================================================
 
 $parents = [];
 
 $sql = "
     SELECT
-        p.id AS parent_id,
-        p.user_id,
-        p.enrollment_id,
+        u.id AS user_id,
+        u.first_name AS account_first_name,
+        u.middle_name AS account_middle_name,
+        u.last_name AS account_last_name,
+        u.email AS account_email,
+        u.contact AS account_contact,
+        u.status AS account_status,
 
-        u.first_name AS guardian_first_name,
-        u.middle_name AS guardian_middle_name,
-        u.last_name AS guardian_last_name,
-        u.email AS guardian_email,
+        c.id AS child_id,
+        c.first_name AS child_first_name,
+        c.middle_name AS child_middle_name,
+        c.last_name AS child_last_name,
 
-        e.c_first_name,
-        e.c_middle_name,
-        e.c_last_name,
+        e.id AS enrollment_id,
+        e.status AS enrollment_status,
         e.academic_id,
 
         ay.academic_year
 
-    FROM `parent` p
+    FROM users u
 
-    INNER JOIN users u
-        ON u.id = p.user_id
+    INNER JOIN children c
+        ON c.user_id = u.id
 
     INNER JOIN enrollment e
-        ON e.id = p.enrollment_id
+        ON e.child_id = c.id
 
-    LEFT JOIN academicyear ay
+    LEFT JOIN academic_year ay
         ON ay.id = e.academic_id
 
-    WHERE e.status = 1
+    WHERE u.role = 'parent'
+      AND e.status = 'approved'
 ";
 
-// Apply academic year filter
 if ($filterAcademicId > 0) {
     $sql .= " AND e.academic_id = ?";
 }
 
-$sql .= " ORDER BY p.id DESC";
+$sql .= " ORDER BY u.id DESC";
 
 $stmt = $conn->prepare($sql);
 
@@ -138,196 +138,103 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 
-// ==========================================================
-// PAGE
-// ==========================================================
-
 include '../layout/header.php';
 
 ?>
 
 <div class="parents-page">
 
-    <!-- ======================================================
-         ALERTS
-         ====================================================== -->
-
+    <!-- ALERTS -->
     <?php if (!empty($_SESSION['message'])): ?>
 
-        <div
-            class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger' ?> alert-dismissible fade show"
-            role="alert">
-
+        <div class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
             <?= e($_SESSION['message']) ?>
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close">
-            </button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <?php
-        unset($_SESSION['status'], $_SESSION['message']);
-        ?>
+        <?php unset($_SESSION['status'], $_SESSION['message']); ?>
 
     <?php endif; ?>
 
 
-    <!-- ======================================================
-         PAGE HEADER
-         ====================================================== -->
-
+    <!-- PAGE HEADER -->
     <div class="d-flex align-items-center justify-content-between mb-3">
-
         <div>
-            <h2 class="fw-bold fs-4 mb-1">
-                <?= e($pageTitle) ?>
-            </h2>
+            <h2 class="fw-bold fs-4 mb-1"><?= e($pageTitle) ?></h2>
         </div>
-
     </div>
 
 
-    <!-- ======================================================
-         CURRENT ACADEMIC YEAR + FILTER
-         ====================================================== -->
-
+    <!-- CURRENT ACADEMIC YEAR + FILTER -->
     <div class="card mb-3">
-
         <div class="card-body">
-
             <div class="row g-3 align-items-center">
 
-                <!-- CURRENT ACADEMIC YEAR -->
-
                 <div class="col-12 col-md-6 col-lg-8 current-year-chip">
-
                     <div class="icon">
                         <i class="bi bi-calendar-check"></i>
                     </div>
-
                     <div>
-
-                        <div class="year-label-sm">
-                            Current Academic Year
-                        </div>
-
+                        <div class="year-label-sm">Current Academic Year</div>
                         <div class="year-value-sm">
-
                             <?php if ($currentYear): ?>
-
                                 <?= e($currentYear['academic_year']) ?>
-
                             <?php else: ?>
-
-                                <span class="text-muted">
-                                    None active
-                                </span>
-
+                                <span class="text-muted">None active</span>
                             <?php endif; ?>
-
                         </div>
-
                     </div>
-
                 </div>
 
-
-                <!-- ACADEMIC YEAR FILTER -->
-
-                <form
-                    class="filter-form col-12 col-md-6 col-lg-4"
-                    method="GET"
-                    action="">
-
-                    <label
-                        for="academic_id"
-                        class="filter-label">
-
-                        <i class="bi bi-funnel me-1"></i>
-                        Filter by Academic Year
-
+                <form class="filter-form col-12 col-md-6 col-lg-4" method="GET">
+                    <label for="academic_id" class="filter-label">
+                        <i class="bi bi-funnel me-1"></i> Filter by Academic Year
                     </label>
-
-                    <select
-                        name="academic_id"
-                        id="academic_id"
-                        class="form-select form-select-sm filter-select"
-                        onchange="this.form.submit()">
-
+                    <select name="academic_id" id="academic_id"
+                            class="form-select form-select-sm filter-select"
+                            onchange="this.form.submit()">
                         <?php foreach ($academicYears as $year): ?>
-
-                            <option
-                                value="<?= (int) $year['id'] ?>"
+                            <option value="<?= (int) $year['id'] ?>"
                                 <?= $filterAcademicId === (int) $year['id'] ? 'selected' : '' ?>>
-
                                 <?= e($year['academic_year']) ?>
-
-                                <?= (int) $year['status'] === 1 ? ' (Active)' : '' ?>
-
+                                <?= $year['status'] === 'active' ? ' (Active)' : '' ?>
                             </option>
-
                         <?php endforeach; ?>
-
                     </select>
-
                 </form>
 
             </div>
-
         </div>
-
     </div>
 
 
-    <!-- ======================================================
-         PARENTS TABLE
-         ====================================================== -->
-
+    <!-- PARENTS TABLE -->
     <div class="card p-0">
 
         <div class="card-header bg-paper border-bottom p-3">
-
             <div class="d-flex align-items-center justify-content-between gap-2">
-
                 <h6 class="fw-bold mb-0">
                     <i class="bi bi-people text-primary me-2"></i>
                     Parents and Guardians
                 </h6>
-
                 <span class="badge bg-paper-soft text-secondary border">
                     <?= count($parents) ?> record<?= count($parents) !== 1 ? 's' : '' ?>
                 </span>
-
             </div>
-
         </div>
 
         <div class="table-responsive">
-
             <table class="table mb-0 data-table text-nowrap">
 
                 <thead>
-
                     <tr>
-
-                        <th>Parent ID</th>
-
-                        <th>Guardian Name</th>
-
-                        <th>Guardian Email</th>
-
+                        <th>User ID</th>
+                        <th>Parent Name</th>
+                        <th>Parent Email</th>
                         <th>Child Name</th>
-
                         <th>Academic Year</th>
-
                         <th>Actions</th>
-
                     </tr>
-
                 </thead>
 
                 <tbody>
@@ -338,90 +245,48 @@ include '../layout/header.php';
 
                             <tr>
 
-                                <!-- ACTUAL PARENT TABLE ID -->
-
                                 <td>
-                                    <span class="fw-semibold">
-                                        <?= (int) $row['parent_id'] ?>
-                                    </span>
+                                    <span class="fw-semibold"><?= (int) $row['user_id'] ?></span>
                                 </td>
 
-
-                                <!-- GUARDIAN NAME FROM USERS -->
-
                                 <td>
-
                                     <?= e(trim(
-                                        $row['guardian_first_name'] . ' ' .
-                                        $row['guardian_middle_name'] . ' ' .
-                                        $row['guardian_last_name']
+                                        $row['account_first_name'] . ' ' .
+                                        $row['account_middle_name'] . ' ' .
+                                        $row['account_last_name']
                                     )) ?>
-
                                 </td>
 
-
-                                <!-- GUARDIAN EMAIL FROM USERS -->
-
-                                <td>
-                                    <?= e($row['guardian_email']) ?>
-                                </td>
-
-
-                                <!-- CHILD NAME FROM ENROLLMENT -->
+                                <td><?= e($row['account_email']) ?></td>
 
                                 <td>
-
                                     <?= e(trim(
-                                        $row['c_first_name'] . ' ' .
-                                        $row['c_middle_name'] . ' ' .
-                                        $row['c_last_name']
+                                        $row['child_first_name'] . ' ' .
+                                        $row['child_middle_name'] . ' ' .
+                                        $row['child_last_name']
                                     )) ?>
-
                                 </td>
 
-
-                                <!-- ACADEMIC YEAR -->
-
                                 <td>
-
                                     <?php if (!empty($row['academic_year'])): ?>
-
                                         <span class="badge bg-paper-soft text-secondary">
                                             <?= e($row['academic_year']) ?>
                                         </span>
-
                                     <?php else: ?>
-
-                                        <span class="text-muted small">
-                                            Not assigned
-                                        </span>
-
+                                        <span class="text-muted small">Not assigned</span>
                                     <?php endif; ?>
-
                                 </td>
 
-
-                                <!-- ACTIONS -->
-
                                 <td>
-
-                                    <a
-                                        href="view.php?id=<?= (int) $row['parent_id'] ?>"
-                                        class="btn btn-outline-primary btn-sm"
-                                        title="View Parent">
-
+                                    <a href="view.php?id=<?= (int) $row['user_id'] ?>&child_id=<?= (int) $row['child_id'] ?>"
+                                       class="btn btn-outline-primary btn-sm">
                                         View
-
                                     </a>
 
-                                    <a
-                                        href="edit.php?id=<?= (int) $row['parent_id'] ?>"
-                                        class="btn btn-warning btn-sm"
-                                        title="Edit Parent">
+                                    <a href="edit.php?id=<?= (int) $row['user_id'] ?>&child_id=<?= (int) $row['child_id'] ?>"
+                                       class="btn btn-warning btn-sm">
                                         Edit
-
                                     </a>
-
                                 </td>
 
                             </tr>
@@ -431,32 +296,18 @@ include '../layout/header.php';
                     <?php else: ?>
 
                         <tr>
-
-                            <td
-                                colspan="6"
-                                class="text-center py-5">
-
+                            <td colspan="6" class="text-center py-5">
                                 <i class="bi bi-people fs-2 text-muted"></i>
-
-                                <h6 class="fw-semibold mt-2">
-                                    No Parents Found
-                                </h6>
-
+                                <h6 class="fw-semibold mt-2">No Parents Found</h6>
                                 <p class="text-muted small mb-0">
                                     <?php if ($filterAcademicId > 0): ?>
-
                                         No approved parent enrollments were found
                                         for the selected academic year.
-
                                     <?php else: ?>
-
                                         No approved parent enrollments are available.
-
                                     <?php endif; ?>
                                 </p>
-
                             </td>
-
                         </tr>
 
                     <?php endif; ?>
@@ -464,7 +315,6 @@ include '../layout/header.php';
                 </tbody>
 
             </table>
-
         </div>
 
     </div>

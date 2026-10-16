@@ -1,32 +1,34 @@
 <?php
+
 require_once '../guard.php';
 include "../../../api/conn.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    $id = $_GET['id'];
+    $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-    $status = 0;
+    if ($id <= 0) {
+        $_SESSION['status'] = "danger";
+        $_SESSION['message'] = "Invalid enrollment ID.";
+        header("Location: index.php");
+        exit();
+    }
 
-   // Update users
-    $sql = "UPDATE enrollment
-            SET status = ?
-            WHERE id = ?";
+    $newStatus = 'pending';
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param(
-        "ii",
-        $status,
-        $id
-    );
+    $stmt = $conn->prepare("
+        UPDATE enrollment
+        SET status = ?
+        WHERE id = ? AND status = 'rejected'
+    ");
 
+    $stmt->bind_param("si", $newStatus, $id);
     $stmt->execute();
     $stmt->close();
 
     $_SESSION['status'] = "success";
-    $_SESSION['message'] = "Student Restored Successfully!";
+    $_SESSION['message'] = "Enrollment restored successfully!";
 
     header("Location: index.php");
     exit();
 }
-?>

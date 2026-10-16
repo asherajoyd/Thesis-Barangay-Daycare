@@ -2,8 +2,8 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "barangaydaycare";
-
+// $dbname = "barangaydaycare";
+$dbname = "final_barangay";
 
 // ========================================
 // Database Connection

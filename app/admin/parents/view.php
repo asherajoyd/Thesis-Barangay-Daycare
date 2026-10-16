@@ -5,117 +5,147 @@ $pageTitle = "Parents";
 require_once '../guard.php';
 include "../../../api/conn.php";
 
-// ==========================================================
-// HELPER
-// ==========================================================
 
 function e($value)
 {
     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
+function fullName($first, $middle, $last)
+{
+    return trim(($first ?? '') . ' ' . ($middle ?? '') . ' ' . ($last ?? ''));
+}
+
+
 // ==========================================================
-// GET PARENT ID
+// GET IDS
 // ==========================================================
 
-$parentId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$userId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$childId = filter_input(INPUT_GET, 'child_id', FILTER_VALIDATE_INT);
 
 $parent = null;
+$familyMembers = [];
 
-if ($parentId) {
+
+if ($userId && $userId > 0) {
 
     // ==========================================================
-    // GET PARENT, USER ACCOUNT, AND ENROLLMENT INFORMATION
+    // GET PARENT (users) + CHILD + ENROLLMENT
     // ==========================================================
 
-    $stmt = $conn->prepare("
+    $sql = "
         SELECT
-            p.id AS parent_id,
-            p.user_id,
-            p.enrollment_id,
-
+            u.id AS user_id,
             u.first_name AS account_first_name,
             u.middle_name AS account_middle_name,
             u.last_name AS account_last_name,
             u.email AS account_email,
+            u.contact AS account_contact,
             u.role AS account_role,
+            u.status AS account_status,
 
-            en.id AS child_id,
-            en.c_first_name,
-            en.c_middle_name,
-            en.c_last_name,
-            en.c_gender,
-            en.c_birthdate,
-            en.c_address,
-            en.c_place_of_birth,
+            c.id AS child_id,
+            c.first_name AS child_first_name,
+            c.middle_name AS child_middle_name,
+            c.last_name AS child_last_name,
+            c.gender AS child_gender,
+            c.birthdate AS child_birthdate,
+            c.address AS child_address,
+            c.place_of_birth AS child_place_of_birth,
 
-            en.f_first_name,
-            en.f_middle_name,
-            en.f_last_name,
-            en.f_email,
-
-            en.m_first_name,
-            en.m_middle_name,
-            en.m_last_name,
-            en.m_email,
-
-            en.g_first_name,
-            en.g_middle_name,
-            en.g_last_name,
-            en.g_email,
-
-            en.status AS enrollment_status,
-            en.created_at,
-            en.academic_id,
-            en.file_type,
-            en.file_image,
+            e.id AS enrollment_id,
+            e.status AS enrollment_status,
+            e.created_at,
+            e.academic_id,
 
             ay.academic_year
 
-        FROM `parent` p
+        FROM users u
 
-        INNER JOIN users u
-            ON u.id = p.user_id
+        INNER JOIN children c
+            ON c.user_id = u.id
 
-        INNER JOIN enrollment en
-            ON en.id = p.enrollment_id
+        INNER JOIN enrollment e
+            ON e.child_id = c.id
 
-        LEFT JOIN academicyear ay
-            ON ay.id = en.academic_id
+        LEFT JOIN academic_year ay
+            ON ay.id = e.academic_id
 
-        WHERE p.id = ?
-        AND en.status = 1
-        LIMIT 1
-    ");
+        WHERE u.id = ?
+          AND u.role = 'parent'
+          AND e.status = 'approved'
+    ";
 
-    $stmt->bind_param("i", $parentId);
+    if ($childId && $childId > 0) {
+        $sql .= " AND c.id = ?";
+    }
+
+    $sql .= " LIMIT 1";
+
+    $stmt = $conn->prepare($sql);
+
+    if ($childId && $childId > 0) {
+        $stmt->bind_param("ii", $userId, $childId);
+    } else {
+        $stmt->bind_param("i", $userId);
+    }
+
     $stmt->execute();
-
     $result = $stmt->get_result();
     $parent = $result->fetch_assoc();
-
     $stmt->close();
+
+
+    // ==========================================================
+    // GET FAMILY MEMBERS (parent_info)
+    // ==========================================================
+
+    if ($parent) {
+
+        $stmt = $conn->prepare("
+            SELECT
+                p.*,
+                u.email AS user_email
+            FROM parent_info p
+            LEFT JOIN users u ON u.id = p.user_id
+            WHERE p.child_id = ?
+            ORDER BY p.is_primary DESC, p.id ASC
+        ");
+
+        $stmt->bind_param("i", $parent['child_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $familyMembers[] = $row;
+        }
+
+        $stmt->close();
+    }
 }
 
-// ==========================================================
-// PAGE
-// ==========================================================
 
 include '../layout/header.php';
 
+
+// ==========================================================
+// PAGE DATA
+// ==========================================================
+
 $accountName = $parent
-    ? trim(
-        $parent['account_first_name'] . ' ' .
-        $parent['account_middle_name'] . ' ' .
+    ? fullName(
+        $parent['account_first_name'],
+        $parent['account_middle_name'],
         $parent['account_last_name']
     )
     : '';
 
 $childName = $parent
-    ? trim(
-        $parent['c_first_name'] . ' ' .
-        $parent['c_middle_name'] . ' ' .
-        $parent['c_last_name']
+    ? fullName(
+        $parent['child_first_name'],
+        $parent['child_middle_name'],
+        $parent['child_last_name']
     )
     : '';
 
@@ -126,33 +156,18 @@ $initial = $parent
 $enrollmentStatus = null;
 
 if ($parent) {
-    switch ((int) $parent['enrollment_status']) {
-        case 0:
-            $enrollmentStatus = [
-                'label' => 'Pending',
-                'class' => 'bg-warning text-dark'
-            ];
+    switch ($parent['enrollment_status']) {
+        case 'pending':
+            $enrollmentStatus = ['label' => 'Pending', 'class' => 'bg-warning text-dark'];
             break;
-
-        case 1:
-            $enrollmentStatus = [
-                'label' => 'Approved',
-                'class' => 'bg-success'
-            ];
+        case 'approved':
+            $enrollmentStatus = ['label' => 'Approved', 'class' => 'bg-success'];
             break;
-
-        case 2:
-            $enrollmentStatus = [
-                'label' => 'Rejected',
-                'class' => 'bg-danger'
-            ];
+        case 'rejected':
+            $enrollmentStatus = ['label' => 'Rejected', 'class' => 'bg-danger'];
             break;
-
         default:
-            $enrollmentStatus = [
-                'label' => 'Unknown',
-                'class' => 'bg-secondary'
-            ];
+            $enrollmentStatus = ['label' => 'Unknown', 'class' => 'bg-secondary'];
     }
 }
 
@@ -160,432 +175,254 @@ if ($parent) {
 
 <section>
 
-    <!-- PAGE HEADER -->
     <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
-
         <div>
             <h2 class="fw-bold fs-4 mb-1">View Parent</h2>
-            <p class="text-muted small mb-0">
-                View parent account and family information
-            </p>
+            <p class="text-muted small mb-0">View parent account and family information</p>
         </div>
-
-        <a href="<?= e($baseUrl) ?>parents/"
-           class="btn btn-light border btn-sm flex-shrink-0">
-
+        <a href="<?= e($baseUrl) ?>parents/" class="btn btn-light border btn-sm flex-shrink-0">
             <i class="bi bi-arrow-left me-1"></i>
             <span class="d-none d-sm-inline">Back</span>
-
         </a>
-
     </div>
 
     <?php if (!$parent): ?>
 
-        <!-- PARENT NOT FOUND -->
         <div class="card border rounded-3">
             <div class="card-body text-center py-5">
-
                 <i class="bi bi-person-exclamation fs-1 text-muted"></i>
-
                 <h5 class="fw-bold mt-3">Parent Not Found</h5>
-
-                <p class="text-muted small mb-3">
-                    The parent record does not exist or the ID is invalid.
-                </p>
-
-                <a href="<?= e($baseUrl) ?>parents/"
-                   class="btn btn-primary btn-sm">
-
-                    Return to Parents
-
-                </a>
-
+                <p class="text-muted small mb-3">The parent record does not exist or the ID is invalid.</p>
+                <a href="<?= e($baseUrl) ?>parents/" class="btn btn-primary btn-sm">Return to Parents</a>
             </div>
         </div>
 
     <?php else: ?>
 
-        <!-- ==================================================
-             PARENT PROFILE
-             ================================================== -->
-
+        <!-- PARENT PROFILE -->
         <div class="card border rounded-3 mb-4">
-
             <div class="card-body p-4">
-
                 <div class="d-flex align-items-center gap-3">
 
-                    <div class="rounded-3 bg-paper-soft text-primary
-                                d-flex align-items-center justify-content-center
-                                fw-bold fs-3 flex-shrink-0"
+                    <div class="rounded-3 bg-paper-soft text-primary d-flex align-items-center justify-content-center fw-bold fs-3 flex-shrink-0"
                          style="width: 60px; height: 60px;">
-
                         <?= e($initial) ?>
-
                     </div>
 
                     <div class="flex-grow-1 min-w-0">
-
-                        <span class="text-muted small">
-                            PARENT ACCOUNT
-                        </span>
-
-                        <h4 class="fw-bold fs-5 mb-1 mt-1">
-                            <?= e($accountName) ?>
-                        </h4>
-
+                        <span class="text-muted small">PARENT ACCOUNT</span>
+                        <h4 class="fw-bold fs-5 mb-1 mt-1"><?= e($accountName) ?></h4>
                         <div class="text-muted small text-break">
                             <i class="bi bi-envelope me-1"></i>
                             <?= e($parent['account_email']) ?>
                         </div>
-
                     </div>
 
                     <span class="badge bg-paper-soft text-secondary border">
-                        Parent #<?= e($parent['parent_id']) ?>
+                        User #<?= e($parent['user_id']) ?>
                     </span>
 
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- ==================================================
-             INFORMATION CARDS
-             ================================================== -->
 
         <div class="row g-3">
 
             <!-- PARENT ACCOUNT INFORMATION -->
             <div class="col-12 col-lg-6">
-
                 <div class="card border rounded-3 h-100">
-
                     <div class="card-header bg-paper border-bottom p-3">
-
                         <h6 class="fw-bold mb-0">
                             <i class="bi bi-person-vcard text-primary me-2"></i>
                             Parent Account Information
                         </h6>
-
                     </div>
-
                     <div class="card-body row p-4">
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                First Name
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e($parent['account_first_name']) ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">First Name</label>
+                            <div class="fw-semibold"><?= e($parent['account_first_name']) ?></div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Middle Name
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e($parent['account_middle_name'] ?: 'Not provided') ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">Middle Name</label>
+                            <div class="fw-semibold"><?= e($parent['account_middle_name'] ?: 'Not provided') ?></div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Last Name
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e($parent['account_last_name']) ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">Last Name</label>
+                            <div class="fw-semibold"><?= e($parent['account_last_name']) ?></div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Email Address
-                            </label>
+                            <label class="text-muted small d-block mb-1">Contact Number</label>
+                            <div class="fw-semibold"><?= e($parent['account_contact'] ?: 'Not provided') ?></div>
+                        </div>
 
-                            <div class="fw-semibold text-break">
-                                <?= e($parent['account_email']) ?>
-                            </div>
+                        <div class="mb-4 col-md-6">
+                            <label class="text-muted small d-block mb-1">Email Address</label>
+                            <div class="fw-semibold text-break"><?= e($parent['account_email']) ?></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Status</label>
+                            <span class="badge <?= $parent['account_status'] === 'active' ? 'bg-success' : 'bg-secondary' ?>">
+                                <?= e(ucfirst($parent['account_status'])) ?>
+                            </span>
                         </div>
 
                     </div>
-
                 </div>
-
             </div>
 
 
             <!-- CHILD INFORMATION -->
             <div class="col-12 col-lg-6">
-
                 <div class="card border rounded-3 h-100">
-
                     <div class="card-header bg-paper border-bottom p-3">
-
                         <h6 class="fw-bold mb-0">
                             <i class="bi bi-person-hearts text-primary me-2"></i>
                             Child Information
                         </h6>
-
                     </div>
-
                     <div class="card-body row p-4">
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Child's Full Name
-                            </label>
+                            <label class="text-muted small d-block mb-1">Child's Full Name</label>
+                            <div class="fw-semibold"><?= e($childName) ?></div>
+                        </div>
 
+                        <div class="mb-4 col-md-6">
+                            <label class="text-muted small d-block mb-1">Gender</label>
+                            <div class="fw-semibold"><?= e(ucfirst($parent['child_gender'])) ?></div>
+                        </div>
+
+                        <div class="mb-4 col-md-6">
+                            <label class="text-muted small d-block mb-1">Birthdate</label>
                             <div class="fw-semibold">
-                                <?= e($childName) ?>
+                                <?= !empty($parent['child_birthdate'])
+                                    ? e(date('F d, Y', strtotime($parent['child_birthdate'])))
+                                    : 'Not provided' ?>
                             </div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Gender
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e(ucfirst($parent['c_gender'])) ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">Place of Birth</label>
+                            <div class="fw-semibold"><?= e($parent['child_place_of_birth'] ?: 'Not provided') ?></div>
                         </div>
 
-                        <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Birthdate
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?php
-                                if (!empty($parent['c_birthdate'])) {
-                                    echo e(date(
-                                        'F d, Y',
-                                        strtotime($parent['c_birthdate'])
-                                    ));
-                                } else {
-                                    echo 'Not provided';
-                                }
-                                ?>
-                            </div>
-                        </div>
-
-                        <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Place of Birth
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e($parent['c_place_of_birth'] ?: 'Not provided') ?>
-                            </div>
+                        <div class="col-12">
+                            <label class="text-muted small d-block mb-1">Address</label>
+                            <div class="fw-semibold"><?= e($parent['child_address'] ?: 'Not provided') ?></div>
                         </div>
 
                     </div>
-
                 </div>
-
             </div>
 
 
-            <!-- FATHER INFORMATION -->
-            <div class="col-12 col-lg-6">
-
-                <div class="card border rounded-3 h-100">
-
+            <!-- FAMILY INFORMATION -->
+            <div class="col-12">
+                <div class="card border rounded-3">
                     <div class="card-header bg-paper border-bottom p-3">
-
                         <h6 class="fw-bold mb-0">
-                            <i class="bi bi-person text-primary me-2"></i>
-                            Father's Information
+                            <i class="bi bi-people text-primary me-2"></i>
+                            Family Information
                         </h6>
-
                     </div>
-
                     <div class="card-body p-4">
 
-                        <div class="mb-4">
-                            <label class="text-muted small d-block mb-1">
-                                Full Name
-                            </label>
+                        <div class="row g-3">
 
-                            <div class="fw-semibold">
-                                <?= e(trim(
-                                    $parent['f_first_name'] . ' ' .
-                                    $parent['f_middle_name'] . ' ' .
-                                    $parent['f_last_name']
-                                ) ?: 'Not provided') ?>
-                            </div>
-                        </div>
+                            <?php if (!empty($familyMembers)): ?>
 
-                        <div>
-                            <label class="text-muted small d-block mb-1">
-                                Email Address
-                            </label>
+                                <?php foreach ($familyMembers as $member): ?>
 
-                            <div class="fw-semibold text-break">
-                                <?= e($parent['f_email'] ?: 'Not provided') ?>
-                            </div>
+                                    <?php
+                                    $role = ucfirst($member['relationship']);
+                                    $icon = $member['relationship'] === 'guardian'
+                                        ? 'bi-person-badge'
+                                        : 'bi-person';
+                                    ?>
+
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="border rounded-3 bg-paper-soft h-100 p-3">
+
+                                            <div class="text-primary text-uppercase fw-bold small mb-2">
+                                                <i class="bi <?= e($icon) ?> me-1"></i>
+                                                <?= e($role) ?>
+                                                <?php if ((int) $member['is_primary'] === 1): ?>
+                                                    <span class="badge bg-primary ms-1">Primary</span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <div class="fw-bold text-break">
+                                                <?= e(fullName(
+                                                    $member['first_name'],
+                                                    $member['middle_name'],
+                                                    $member['last_name']
+                                                ) ?: 'Not provided') ?>
+                                            </div>
+
+                                            <?php if (!empty($member['user_email'])): ?>
+                                                <div class="text-muted small text-break mt-1">
+                                                    <?= e($member['user_email']) ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                        </div>
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                            <?php else: ?>
+
+                                <div class="col-12">
+                                    <p class="text-muted small mb-0 text-center py-3">
+                                        No family information available.
+                                    </p>
+                                </div>
+
+                            <?php endif; ?>
+
                         </div>
 
                     </div>
-
                 </div>
-
-            </div>
-
-
-            <!-- MOTHER INFORMATION -->
-            <div class="col-12 col-lg-6">
-
-                <div class="card border rounded-3 h-100">
-
-                    <div class="card-header bg-paper border-bottom p-3">
-
-                        <h6 class="fw-bold mb-0">
-                            <i class="bi bi-person text-primary me-2"></i>
-                            Mother's Information
-                        </h6>
-
-                    </div>
-
-                    <div class="card-body p-4">
-
-                        <div class="mb-4">
-                            <label class="text-muted small d-block mb-1">
-                                Full Name
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e(trim(
-                                    $parent['m_first_name'] . ' ' .
-                                    $parent['m_middle_name'] . ' ' .
-                                    $parent['m_last_name']
-                                ) ?: 'Not provided') ?>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-muted small d-block mb-1">
-                                Email Address
-                            </label>
-
-                            <div class="fw-semibold text-break">
-                                <?= e($parent['m_email'] ?: 'Not provided') ?>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- GUARDIAN INFORMATION -->
-            <div class="col-12 col-lg-6">
-
-                <div class="card border rounded-3 h-100">
-
-                    <div class="card-header bg-paper border-bottom p-3">
-
-                        <h6 class="fw-bold mb-0">
-                            <i class="bi bi-person-badge text-primary me-2"></i>
-                            Guardian Information
-                        </h6>
-
-                    </div>
-
-                    <div class="card-body p-4">
-
-                        <div class="mb-4">
-                            <label class="text-muted small d-block mb-1">
-                                Full Name
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e(trim(
-                                    $parent['g_first_name'] . ' ' .
-                                    $parent['g_middle_name'] . ' ' .
-                                    $parent['g_last_name']
-                                ) ?: 'Not provided') ?>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-muted small d-block mb-1">
-                                Email Address
-                            </label>
-
-                            <div class="fw-semibold text-break">
-                                <?= e($parent['g_email'] ?: 'Not provided') ?>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
             </div>
 
 
             <!-- ENROLLMENT INFORMATION -->
-            <div class="col-12 col-lg-6">
-
-                <div class="card border rounded-3 h-100">
-
+            <div class="col-12">
+                <div class="card border rounded-3">
                     <div class="card-header bg-paper border-bottom p-3">
-
                         <h6 class="fw-bold mb-0">
                             <i class="bi bi-journal-check text-primary me-2"></i>
                             Enrollment Information
                         </h6>
-
                     </div>
-
                     <div class="card-body row p-4">
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Enrollment ID
-                            </label>
-
-                            <div class="fw-semibold">
-                                #<?= e($parent['enrollment_id']) ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">Enrollment ID</label>
+                            <div class="fw-semibold">#<?= e($parent['enrollment_id']) ?></div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Academic Year
-                            </label>
-
-                            <div class="fw-semibold">
-                                <?= e($parent['academic_year'] ?: 'Not assigned') ?>
-                            </div>
+                            <label class="text-muted small d-block mb-1">Academic Year</label>
+                            <div class="fw-semibold"><?= e($parent['academic_year'] ?: 'Not assigned') ?></div>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Enrollment Status
-                            </label>
-
+                            <label class="text-muted small d-block mb-1">Enrollment Status</label>
                             <span class="badge <?= e($enrollmentStatus['class']) ?>">
                                 <?= e($enrollmentStatus['label']) ?>
                             </span>
                         </div>
 
                         <div class="mb-4 col-md-6">
-                            <label class="text-muted small d-block mb-1">
-                                Date Submitted
-                            </label>
-
+                            <label class="text-muted small d-block mb-1">Date Submitted</label>
                             <div class="fw-semibold">
                                 <?= !empty($parent['created_at'])
                                     ? e(date('F d, Y h:i A', strtotime($parent['created_at'])))
@@ -593,20 +430,8 @@ if ($parent) {
                             </div>
                         </div>
 
-                        <div>
-                            <label class="text-muted small d-block mb-1">
-                                Parent Record ID
-                            </label>
-
-                            <div class="fw-semibold">
-                                #<?= e($parent['parent_id']) ?>
-                            </div>
-                        </div>
-
                     </div>
-
                 </div>
-
             </div>
 
         </div>

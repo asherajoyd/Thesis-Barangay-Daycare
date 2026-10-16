@@ -4,10 +4,6 @@ require_once '../guard.php';
 include "../../../api/conn.php";
 
 
-// ==========================================================
-// HELPER
-// ==========================================================
-
 function e($value)
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
@@ -22,9 +18,9 @@ $first_name  = "";
 $middle_name = "";
 $last_name   = "";
 $email       = "";
+$contact     = "";
 
 $errorMessage   = "";
-$successMessage = "";
 
 
 // ==========================================================
@@ -37,16 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $middle_name = trim($_POST['middle_name'] ?? '');
     $last_name   = trim($_POST['last_name'] ?? '');
     $email       = trim($_POST['email'] ?? '');
+    $contact     = trim($_POST['contact'] ?? '');
 
     // Validation
     if (
         empty($first_name) ||
-        empty($middle_name) ||
         empty($last_name) ||
         empty($email)
     ) {
 
-        $errorMessage = "All fields are required.";
+        $errorMessage = "First name, last name, and email are required.";
 
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
@@ -78,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $academic_id = null;
 
             $academicQuery = $conn->query("
-                SELECT id FROM academicyear
-                WHERE status = 1
+                SELECT id FROM academic_year
+                WHERE status = 'active'
                 ORDER BY id DESC
                 LIMIT 1
             ");
@@ -88,84 +84,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $academic_id = (int) $academicQuery->fetch_assoc()['id'];
             }
 
-            if (!$academic_id) {
+            $default_password = password_hash("123", PASSWORD_DEFAULT);
+            $role = "teacher";
+            $userStatus = "active";
 
-                $errorMessage =
-                    "No active academic year. Please set one in Settings first.";
+            try {
 
-            } else {
+                $conn->begin_transaction();
 
-                $default_password = password_hash("123", PASSWORD_DEFAULT);
-                $role = "teacher";
+                // 1. Insert user
+                $stmt_user = $conn->prepare("
+                    INSERT INTO users
+                    (first_name, middle_name, last_name, email, password, contact, role, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ");
 
-                try {
+                $stmt_user->bind_param(
+                    "ssssssss",
+                    $first_name,
+                    $middle_name,
+                    $last_name,
+                    $email,
+                    $default_password,
+                    $contact,
+                    $role,
+                    $userStatus
+                );
 
-                    $conn->begin_transaction();
+                $stmt_user->execute();
+                $user_id = $stmt_user->insert_id;
+                $stmt_user->close();
 
-                    // Insert user
-                    $stmt_user = $conn->prepare("
-                        INSERT INTO users
-                        (first_name, middle_name, last_name, email, password, role)
-                        VALUES (?, ?, ?, ?, ?, ?)
+                // 2. Insert teacher
+                $stmt_teacher = $conn->prepare("
+                    INSERT INTO teacher
+                    (first_name, middle_name, last_name, email, contact, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
+
+                $stmt_teacher->bind_param(
+                    "sssssi",
+                    $first_name,
+                    $middle_name,
+                    $last_name,
+                    $email,
+                    $contact,
+                    $user_id
+                );
+
+                $stmt_teacher->execute();
+                $teacher_id = $stmt_teacher->insert_id;
+                $stmt_teacher->close();
+
+                // 3. Insert teacher_assignment (kung may active academic year)
+                if ($academic_id) {
+
+                    $stmt_assign = $conn->prepare("
+                        INSERT INTO teacher_assignment
+                        (teacher_id, academic_id)
+                        VALUES (?, ?)
                     ");
 
-                    $stmt_user->bind_param(
-                        "ssssss",
-                        $first_name,
-                        $middle_name,
-                        $last_name,
-                        $email,
-                        $default_password,
-                        $role
-                    );
-
-                    $stmt_user->execute();
-                    $user_id = $stmt_user->insert_id;
-                    $stmt_user->close();
-
-                    // Insert teacher
-                    $stmt_teacher = $conn->prepare("
-                        INSERT INTO teacher
-                        (first_name, middle_name, last_name, email, user_id, academic_id)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ");
-
-                    $stmt_teacher->bind_param(
-                        "ssssii",
-                        $first_name,
-                        $middle_name,
-                        $last_name,
-                        $email,
-                        $user_id,
+                    $stmt_assign->bind_param(
+                        "ii",
+                        $teacher_id,
                         $academic_id
                     );
 
-                    $stmt_teacher->execute();
-                    $stmt_teacher->close();
-
-                    $conn->commit();
-
-                    $_SESSION['status'] = "success";
-                    $_SESSION['message'] =
-                        "Teacher added successfully. Default password: 123";
-
-                    header("Location: index.php");
-                    exit;
-
-                } catch (Exception $e) {
-
-                    $conn->rollback();
-                    $errorMessage = "Failed to add teacher. Please try again.";
+                    $stmt_assign->execute();
+                    $stmt_assign->close();
                 }
+
+                $conn->commit();
+
+                $_SESSION['status'] = "success";
+                $_SESSION['message'] =
+                    "Teacher added successfully. Default password: 123";
+
+                header("Location: index.php");
+                exit;
+
+            } catch (Exception $e) {
+
+                $conn->rollback();
+                $errorMessage = "Failed to add teacher. Please try again.";
             }
         }
     }
 }
 
-
-// ==========================================================
-// PAGE
-// ==========================================================
 
 $pageTitle = "Add Teacher";
 
@@ -175,29 +182,12 @@ include '../layout/header.php';
 
 
 <style>
-    /* Small mobile improvements */
     @media (max-width: 575.98px) {
-
-        .teacher-form-card {
-            border-radius: 0.75rem;
-        }
-
-        .teacher-header {
-            align-items: flex-start !important;
-        }
-
-        .teacher-header .btn {
-            white-space: nowrap;
-        }
-
-        .teacher-actions {
-            flex-direction: column;
-        }
-
-        .teacher-actions .btn {
-            width: 100%;
-        }
-
+        .teacher-form-card { border-radius: 0.75rem; }
+        .teacher-header { align-items: flex-start !important; }
+        .teacher-header .btn { white-space: nowrap; }
+        .teacher-actions { flex-direction: column; }
+        .teacher-actions .btn { width: 100%; }
     }
 </style>
 
@@ -205,14 +195,11 @@ include '../layout/header.php';
 <div>
 
     <!-- Header -->
-    <div class="teacher-header d-flex align-items-center
-                justify-content-between gap-2 mb-3">
+    <div class="teacher-header d-flex align-items-center justify-content-between gap-2 mb-3">
 
         <div class="min-w-0">
             <h2 class="fw-bold fs-4 mb-0">Add Teacher</h2>
-            <small class="text-muted">
-                Create a new teacher account
-            </small>
+            <small class="text-muted">Create a new teacher account</small>
         </div>
 
         <a href="<?= $baseUrl ?>teachers/" class="btn btn-sm btn-light border">
@@ -226,18 +213,10 @@ include '../layout/header.php';
     <!-- Error -->
     <?php if (!empty($errorMessage)): ?>
 
-        <div class="alert alert-danger alert-dismissible fade show
-                    py-2 px-3 small mb-3"
-             role="alert">
-
+        <div class="alert alert-danger alert-dismissible fade show py-2 px-3 small mb-3" role="alert">
             <i class="bi bi-exclamation-circle me-1"></i>
             <?= e($errorMessage) ?>
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert">
-            </button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
     <?php endif; ?>
@@ -245,89 +224,45 @@ include '../layout/header.php';
 
     <!-- Form Card -->
     <div class="card teacher-form-card border-0 shadow-sm">
-
         <div class="card-body p-3 p-md-4">
 
-            <form action="create-teacher.php"
-                  method="POST"
-                  autocomplete="off">
+            <form action="create-teacher.php" method="POST" autocomplete="off">
 
-                <!-- Fields -->
                 <div class="row g-3">
 
-                    <!-- First Name -->
                     <div class="col-12 col-sm-6 col-lg-3">
-
-                        <label class="form-label small mb-1">
-                            First Name
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="text"
-                               name="first_name"
-                               class="form-control"
-                               placeholder="First name"
-                               value="<?= e($first_name) ?>"
-                               autocomplete="given-name"
-                               required>
-
+                        <label class="form-label small mb-1">First Name <span class="text-danger">*</span></label>
+                        <input type="text" name="first_name" class="form-control"
+                               placeholder="First name" value="<?= e($first_name) ?>"
+                               autocomplete="given-name" required>
                     </div>
 
-
-                    <!-- Middle Name -->
                     <div class="col-12 col-sm-6 col-lg-3">
-
-                        <label class="form-label small mb-1">
-                            Middle Name
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="text"
-                               name="middle_name"
-                               class="form-control"
-                               placeholder="Middle name"
-                               value="<?= e($middle_name) ?>"
-                               autocomplete="additional-name"
-                               required>
-
+                        <label class="form-label small mb-1">Middle Name</label>
+                        <input type="text" name="middle_name" class="form-control"
+                               placeholder="Middle name" value="<?= e($middle_name) ?>"
+                               autocomplete="additional-name">
                     </div>
 
-
-                    <!-- Last Name -->
                     <div class="col-12 col-sm-6 col-lg-3">
-
-                        <label class="form-label small mb-1">
-                            Last Name
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="text"
-                               name="last_name"
-                               class="form-control"
-                               placeholder="Last name"
-                               value="<?= e($last_name) ?>"
-                               autocomplete="family-name"
-                               required>
-
+                        <label class="form-label small mb-1">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" name="last_name" class="form-control"
+                               placeholder="Last name" value="<?= e($last_name) ?>"
+                               autocomplete="family-name" required>
                     </div>
 
-
-                    <!-- Email -->
                     <div class="col-12 col-sm-6 col-lg-3">
+                        <label class="form-label small mb-1">Email <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control"
+                               placeholder="name@example.com" value="<?= e($email) ?>"
+                               autocomplete="email" required>
+                    </div>
 
-                        <label class="form-label small mb-1">
-                            Email
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="email"
-                               name="email"
-                               class="form-control"
-                               placeholder="name@example.com"
-                               value="<?= e($email) ?>"
-                               autocomplete="email"
-                               required>
-
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <label class="form-label small mb-1">Contact Number</label>
+                        <input type="text" name="contact" class="form-control"
+                               placeholder="09XX XXX XXXX" value="<?= e($contact) ?>"
+                               maxlength="20">
                     </div>
 
                 </div>
@@ -336,30 +271,18 @@ include '../layout/header.php';
                 <!-- Footer -->
                 <div class="border-top mt-4 pt-3">
 
-                    <div class="d-flex flex-column flex-sm-row
-                                align-items-sm-center
-                                justify-content-between gap-3">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
 
                         <small class="text-muted fw-semibold">
                             <i class="bi bi-info-circle me-1"></i>
                             Default password: <code class="fw-bold">123</code>
                         </small>
 
-
                         <div class="teacher-actions d-flex gap-2">
 
-                            <a href="<?= $baseUrl ?>teachers/"
-                               class="btn btn-light border">
+                            <a href="<?= $baseUrl ?>teachers/" class="btn btn-light border">Cancel</a>
 
-                                Cancel
-
-                            </a>
-
-                            <button type="submit"
-                                    class="btn btn-primary">
-                                Save Teacher
-
-                            </button>
+                            <button type="submit" class="btn btn-primary">Save Teacher</button>
 
                         </div>
 
@@ -370,7 +293,6 @@ include '../layout/header.php';
             </form>
 
         </div>
-
     </div>
 
 </div>

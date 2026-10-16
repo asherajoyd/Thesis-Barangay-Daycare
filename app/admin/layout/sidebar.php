@@ -89,21 +89,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
-
-                 <!-- Schedule -->
-                <a
-                    href="<?= $baseUrl ?>schedule/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Schedule' ? 'active' : '' ?>"
-                >
-                    <span class="sidebar-icon">
-                        <i class="bi bi-calendar-minus"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Schedule
-                    </span>
-                </a>
-
             </nav>
 
         </div>
@@ -168,6 +153,40 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
             </nav>
 
         </div>
+
+
+
+
+         <!-- =====================================================
+             Schedule
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                Schedule
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Sessions -->
+                <a
+                    href="<?= $baseUrl ?>sessions/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Sessions' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-clipboard-minus"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Sessions
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
+
 
 
 

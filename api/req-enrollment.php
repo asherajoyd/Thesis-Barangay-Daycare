@@ -2,13 +2,6 @@
 
 require_once('conn.php');
 
-
-/*
-|--------------------------------------------------------------------------
-| RESPONSE HEADER
-|--------------------------------------------------------------------------
-*/
-
 header('Content-Type: application/json');
 
 
@@ -19,19 +12,17 @@ header('Content-Type: application/json');
 */
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'Invalid request method.'
     ]);
-
     exit;
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| ENROLLMENT ACTION
+| ACTION CHECK
 |--------------------------------------------------------------------------
 */
 
@@ -39,12 +30,10 @@ if (
     !isset($_POST['action']) ||
     $_POST['action'] !== 'enrollment'
 ) {
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'Invalid enrollment request.'
     ]);
-
     exit;
 }
 
@@ -55,114 +44,53 @@ if (
 |--------------------------------------------------------------------------
 */
 
-$c_first_name = trim(
-    $_POST['c_first_name'] ?? ''
-);
-
-$c_middle_name = trim(
-    $_POST['c_middle_name'] ?? ''
-);
-
-$c_last_name = trim(
-    $_POST['c_last_name'] ?? ''
-);
-
-$c_gender = trim(
-    $_POST['c_gender'] ?? ''
-);
-
-$c_birthdate = trim(
-    $_POST['c_birthdate'] ?? ''
-);
-
-$c_address = trim(
-    $_POST['c_address'] ?? ''
-);
-
-$c_place_of_birth = trim(
-    $_POST['c_place_of_birth'] ?? ''
-);
+$c_first_name     = trim($_POST['c_first_name'] ?? '');
+$c_middle_name    = trim($_POST['c_middle_name'] ?? '');
+$c_last_name      = trim($_POST['c_last_name'] ?? '');
+$c_gender         = trim($_POST['c_gender'] ?? '');
+$c_birthdate      = trim($_POST['c_birthdate'] ?? '');
+$c_address        = trim($_POST['c_address'] ?? '');
+$c_place_of_birth = trim($_POST['c_place_of_birth'] ?? '');
 
 
 /*
 |--------------------------------------------------------------------------
-| FATHER INFORMATION
+| FATHER
 |--------------------------------------------------------------------------
 */
 
-$f_first_name = trim(
-    $_POST['f_first_name'] ?? ''
-);
-
-$f_middle_name = trim(
-    $_POST['f_middle_name'] ?? ''
-);
-
-$f_last_name = trim(
-    $_POST['f_last_name'] ?? ''
-);
-
-$f_email = '';
+$f_first_name  = trim($_POST['f_first_name'] ?? '');
+$f_middle_name = trim($_POST['f_middle_name'] ?? '');
+$f_last_name   = trim($_POST['f_last_name'] ?? '');
 
 
 /*
 |--------------------------------------------------------------------------
-| MOTHER INFORMATION
+| MOTHER
 |--------------------------------------------------------------------------
 */
 
-$m_first_name = trim(
-    $_POST['m_first_name'] ?? ''
-);
-
-$m_middle_name = trim(
-    $_POST['m_middle_name'] ?? ''
-);
-
-$m_last_name = trim(
-    $_POST['m_last_name'] ?? ''
-);
-
-$m_email = '';
+$m_first_name  = trim($_POST['m_first_name'] ?? '');
+$m_middle_name = trim($_POST['m_middle_name'] ?? '');
+$m_last_name   = trim($_POST['m_last_name'] ?? '');
 
 
 /*
 |--------------------------------------------------------------------------
-| GUARDIAN INFORMATION
+| GUARDIAN
 |--------------------------------------------------------------------------
 */
 
-$g_first_name = trim(
-    $_POST['g_first_name'] ?? ''
-);
-
-$g_middle_name = trim(
-    $_POST['g_middle_name'] ?? ''
-);
-
-$g_last_name = trim(
-    $_POST['g_last_name'] ?? ''
-);
-
-$g_email = trim(
-    $_POST['g_email'] ?? ''
-);
+$g_first_name  = trim($_POST['g_first_name'] ?? '');
+$g_middle_name = trim($_POST['g_middle_name'] ?? '');
+$g_last_name   = trim($_POST['g_last_name'] ?? '');
+$g_email       = trim($_POST['g_email'] ?? '');
+$g_contact     = trim($_POST['g_contact'] ?? '');
 
 
 /*
 |--------------------------------------------------------------------------
-| DOCUMENT INFORMATION
-|--------------------------------------------------------------------------
-*/
-
-$file_type = trim(
-    $_POST['file_type'] ?? ''
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| VALIDATE CHILD INFORMATION
+| VALIDATE CHILD
 |--------------------------------------------------------------------------
 */
 
@@ -174,19 +102,17 @@ if (
     empty($c_address) ||
     empty($c_place_of_birth)
 ) {
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'Please complete all required child information.'
     ]);
-
     exit;
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| VALIDATE GUARDIAN INFORMATION
+| VALIDATE GUARDIAN
 |--------------------------------------------------------------------------
 */
 
@@ -195,289 +121,46 @@ if (
     empty($g_last_name) ||
     empty($g_email)
 ) {
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'Please complete all required guardian information.'
     ]);
-
     exit;
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| VALIDATE GUARDIAN EMAIL
-|--------------------------------------------------------------------------
-*/
-
 if (!filter_var($g_email, FILTER_VALIDATE_EMAIL)) {
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'Please provide a valid guardian email address.'
     ]);
-
     exit;
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| ALLOWED DOCUMENT TYPES
+| CHECK IF GUARDIAN EMAIL EXISTS
 |--------------------------------------------------------------------------
 */
 
-$allowedFileTypes = [
-    'Proof of Address',
-    'Child Birth Certificate',
-    'Guardian Valid ID',
-    'Barangay Certificate',
-    'Other'
-];
+$checkEmail = $conn->prepare("
+    SELECT id FROM users WHERE email = ? LIMIT 1
+");
 
+$checkEmail->bind_param("s", $g_email);
+$checkEmail->execute();
+$emailResult = $checkEmail->get_result();
 
-/*
-|--------------------------------------------------------------------------
-| VALIDATE DOCUMENT TYPE
-|--------------------------------------------------------------------------
-*/
-
-if (
-    empty($file_type) ||
-    !in_array(
-        $file_type,
-        $allowedFileTypes,
-        true
-    )
-) {
-
+if ($emailResult->num_rows > 0) {
     echo json_encode([
         'status'  => 'error',
-        'message' => 'Please select a valid document type.'
+        'message' => 'This email is already registered. Please use a different email.'
     ]);
-
     exit;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| CHECK UPLOADED FILE
-|--------------------------------------------------------------------------
-*/
-
-if (
-    !isset($_FILES['file_image']) ||
-    $_FILES['file_image']['error'] !== UPLOAD_ERR_OK
-) {
-
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Please upload a supporting document.'
-    ]);
-
-    exit;
-}
-
-
-$file = $_FILES['file_image'];
-
-
-/*
-|--------------------------------------------------------------------------
-| MAXIMUM FILE SIZE
-|--------------------------------------------------------------------------
-|
-| 5 MB
-|
-*/
-
-$maxFileSize = 5 * 1024 * 1024;
-
-
-if ($file['size'] > $maxFileSize) {
-
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'The uploaded file must not exceed 5MB.'
-    ]);
-
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| FILE EXTENSION
-|--------------------------------------------------------------------------
-*/
-
-$originalName = $file['name'];
-
-$extension = strtolower(
-    pathinfo(
-        $originalName,
-        PATHINFO_EXTENSION
-    )
-);
-
-
-$allowedExtensions = [
-    'jpg',
-    'jpeg',
-    'png',
-    'pdf'
-];
-
-
-if (
-    !in_array(
-        $extension,
-        $allowedExtensions,
-        true
-    )
-) {
-
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Invalid file type. Only JPG, JPEG, PNG, and PDF files are allowed.'
-    ]);
-
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| MIME TYPE VALIDATION
-|--------------------------------------------------------------------------
-*/
-
-$finfo = finfo_open(
-    FILEINFO_MIME_TYPE
-);
-
-$mimeType = finfo_file(
-    $finfo,
-    $file['tmp_name']
-);
-
-finfo_close($finfo);
-
-
-$allowedMimeTypes = [
-    'image/jpeg',
-    'image/png',
-    'application/pdf'
-];
-
-
-if (
-    !in_array(
-        $mimeType,
-        $allowedMimeTypes,
-        true
-    )
-) {
-
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'The uploaded file content is not valid.'
-    ]);
-
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| UPLOAD DIRECTORY
-|--------------------------------------------------------------------------
-|
-| Current backend:
-|
-| api/
-| ├── req-enrollment.php
-| └── file-image/
-|
-*/
-
-$uploadDirectory = __DIR__ . '/file-image/';
-
-
-/*
-|--------------------------------------------------------------------------
-| CREATE DIRECTORY IF IT DOES NOT EXIST
-|--------------------------------------------------------------------------
-*/
-
-if (!is_dir($uploadDirectory)) {
-
-    if (!mkdir(
-        $uploadDirectory,
-        0755,
-        true
-    )) {
-
-        echo json_encode([
-            'status'  => 'error',
-            'message' => 'Unable to create upload directory.'
-        ]);
-
-        exit;
-    }
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| GENERATE UNIQUE FILE NAME
-|--------------------------------------------------------------------------
-*/
-
-$uniqueName =
-    'ENR-' .
-    date('Ymd-His') .
-    '-' .
-    bin2hex(
-        random_bytes(5)
-    ) .
-    '.' .
-    $extension;
-
-
-/*
-|--------------------------------------------------------------------------
-| FULL FILE PATH
-|--------------------------------------------------------------------------
-*/
-
-$filePath =
-    $uploadDirectory .
-    $uniqueName;
-
-
-/*
-|--------------------------------------------------------------------------
-| MOVE FILE
-|--------------------------------------------------------------------------
-*/
-
-if (
-    !move_uploaded_file(
-        $file['tmp_name'],
-        $filePath
-    )
-) {
-
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Failed to upload the supporting document.'
-    ]);
-
-    exit;
-}
+$checkEmail->close();
 
 
 /*
@@ -488,277 +171,453 @@ if (
 
 $academic_id = null;
 
-
 $academicQuery = $conn->query("
     SELECT id
-    FROM academicyear
-    WHERE status = 1
+    FROM academic_year
+    WHERE status = 'active'
     ORDER BY id DESC
     LIMIT 1
 ");
 
-
-if (
-    $academicQuery &&
-    $academicQuery->num_rows > 0
-) {
-
-    $academicRow =
-        $academicQuery->fetch_assoc();
-
-    $academic_id =
-        (int) $academicRow['id'];
+if ($academicQuery && $academicQuery->num_rows > 0) {
+    $academicRow = $academicQuery->fetch_assoc();
+    $academic_id = (int) $academicRow['id'];
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| NO ACTIVE ACADEMIC YEAR
-|--------------------------------------------------------------------------
-*/
-
 if (!$academic_id) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Remove Uploaded File
-    |--------------------------------------------------------------------------
-    */
-
-    if (file_exists($filePath)) {
-
-        unlink($filePath);
-
-    }
-
-
     echo json_encode([
         'status'  => 'error',
         'message' => 'No active academic year. Please contact the administrator.'
     ]);
-
     exit;
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| INSERT ENROLLMENT
+| FILE UPLOAD VALIDATION
 |--------------------------------------------------------------------------
 */
 
-$sql = "INSERT INTO enrollment (
+$uploads = [
+    'birth'   => 'Child Birth Certificate',
+    'yellow'  => 'Yellow Card',
+    'address' => 'Proof of Address'
+];
 
-            academic_id,
+$uploadedFiles = [];   // storage ng mga na-upload para sa cleanup
+$uploadDir = __DIR__ . '/file-image/';
 
-            c_first_name,
-            c_middle_name,
-            c_last_name,
-            c_gender,
-            c_birthdate,
-            c_address,
-            c_place_of_birth,
 
-            f_first_name,
-            f_middle_name,
-            f_last_name,
-            f_email,
+if (!is_dir($uploadDir)) {
+    if (!mkdir($uploadDir, 0755, true)) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => 'Unable to create upload directory.'
+        ]);
+        exit;
+    }
+}
 
-            m_first_name,
-            m_middle_name,
-            m_last_name,
-            m_email,
 
-            g_first_name,
-            g_middle_name,
-            g_last_name,
-            g_email,
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+$allowedMimeTypes  = ['image/jpeg', 'image/png', 'application/pdf'];
+$maxFileSize       = 5 * 1024 * 1024;
 
-            status,
 
-            file_image,
-            file_type
+foreach ($uploads as $key => $label) {
 
-        )
+    $fileField = 'file_image_' . $key;
 
-        VALUES (
+    if (
+        !isset($_FILES[$fileField]) ||
+        $_FILES[$fileField]['error'] !== UPLOAD_ERR_OK
+    ) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "Please upload the {$label}."
+        ]);
+        exit;
+    }
 
-            ?,
+    $file = $_FILES[$fileField];
 
-            ?, ?, ?, ?, ?, ?, ?,
+    /* Size */
+    if ($file['size'] > $maxFileSize) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "The {$label} file must not exceed 5MB."
+        ]);
+        exit;
+    }
 
-            ?, ?, ?, ?,
+    /* Extension */
+    $extension = strtolower(
+        pathinfo($file['name'], PATHINFO_EXTENSION)
+    );
 
-            ?, ?, ?, ?,
+    if (!in_array($extension, $allowedExtensions, true)) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "Invalid file type for {$label}. Only JPG, JPEG, PNG, and PDF are allowed."
+        ]);
+        exit;
+    }
 
-            ?, ?, ?, ?,
+    /* MIME */
+    $finfo    = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
 
-            ?,
+    if (!in_array($mimeType, $allowedMimeTypes, true)) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "The {$label} file content is not valid."
+        ]);
+        exit;
+    }
 
-            ?,
-            ?
+    /* Move file */
+    $uniqueName = 'ENR-' . date('Ymd-His') . '-' .
+                  bin2hex(random_bytes(5)) . '.' . $extension;
 
-        )";
+    $destination = $uploadDir . $uniqueName;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "Failed to upload the {$label}."
+        ]);
+        exit;
+    }
+
+    $uploadedFiles[$key] = [
+        'file_type'  => $label,
+        'file_image' => $uniqueName
+    ];
+}
 
 
 /*
 |--------------------------------------------------------------------------
-| PREPARE
+| START TRANSACTION
 |--------------------------------------------------------------------------
 */
 
-$stmt = $conn->prepare($sql);
+$conn->begin_transaction();
 
-
-if (!$stmt) {
+try {
 
     /*
     |--------------------------------------------------------------------------
-    | Remove Uploaded File
+    | 1. INSERT CHILD
     |--------------------------------------------------------------------------
     */
 
-    if (file_exists($filePath)) {
+    $stmtChild = $conn->prepare("
+        INSERT INTO children (
+            first_name,
+            middle_name,
+            last_name,
+            gender,
+            birthdate,
+            place_of_birth,
+            address
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
 
-        unlink($filePath);
+    $stmtChild->bind_param(
+        "sssssss",
+        $c_first_name,
+        $c_middle_name,
+        $c_last_name,
+        $c_gender,
+        $c_birthdate,
+        $c_place_of_birth,
+        $c_address
+    );
 
+    if (!$stmtChild->execute()) {
+        throw new Exception('Failed to save child information: ' . $stmtChild->error);
+    }
+
+    $child_id = $stmtChild->insert_id;
+    $stmtChild->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2. INSERT FATHER (kung may pangalan)
+    |--------------------------------------------------------------------------
+    */
+
+    if (!empty($f_first_name) && !empty($f_last_name)) {
+
+        $stmtF = $conn->prepare("
+            INSERT INTO parent_info (
+                child_id,
+                first_name,
+                middle_name,
+                last_name,
+                relationship,
+                is_primary
+            ) VALUES (?, ?, ?, ?, 'father', 0)
+        ");
+
+        $stmtF->bind_param(
+            "isss",
+            $child_id,
+            $f_first_name,
+            $f_middle_name,
+            $f_last_name
+        );
+
+        if (!$stmtF->execute()) {
+            throw new Exception('Failed to save father information: ' . $stmtF->error);
+        }
+
+        $stmtF->close();
     }
 
 
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Failed to prepare enrollment request.'
-    ]);
+    /*
+    |--------------------------------------------------------------------------
+    | 3. INSERT MOTHER (kung may pangalan)
+    |--------------------------------------------------------------------------
+    */
 
-    exit;
-}
+    if (!empty($m_first_name) && !empty($m_last_name)) {
 
+        $stmtM = $conn->prepare("
+            INSERT INTO parent_info (
+                child_id,
+                first_name,
+                middle_name,
+                last_name,
+                relationship,
+                is_primary
+            ) VALUES (?, ?, ?, ?, 'mother', 0)
+        ");
 
-/*
-|--------------------------------------------------------------------------
-| STATUS
-|--------------------------------------------------------------------------
-*/
+        $stmtM->bind_param(
+            "isss",
+            $child_id,
+            $m_first_name,
+            $m_middle_name,
+            $m_last_name
+        );
 
-$status = 0;
+        if (!$stmtM->execute()) {
+            throw new Exception('Failed to save mother information: ' . $stmtM->error);
+        }
 
-
-/*
-|--------------------------------------------------------------------------
-| BIND PARAMETERS
-|--------------------------------------------------------------------------
-|
-| Total parameters: 23
-|
-| 1  = academic_id     → i
-|
-| 2  = c_first_name    → s
-| 3  = c_middle_name   → s
-| 4  = c_last_name     → s
-| 5  = c_gender        → s
-| 6  = c_birthdate     → s
-| 7  = c_address       → s
-| 8  = c_place_of_birth→ s
-|
-| 9  = f_first_name    → s
-| 10 = f_middle_name   → s
-| 11 = f_last_name     → s
-|
-| 12 = m_first_name    → s
-| 13 = m_middle_name   → s
-| 14 = m_last_name     → s
-|
-| 15 = g_first_name    → s
-| 16 = g_middle_name   → s
-| 17 = g_last_name     → s
-| 18 = g_email         → s
-|
-| 21 = status          → i
-|
-| 22 = file_image      → s
-| 23 = file_type       → s
-|
-|--------------------------------------------------------------------------
-*/
-
-$stmt->bind_param(
-    "isssssssssssssssssssiss",
-
-    $academic_id,
-
-    $c_first_name,
-    $c_middle_name,
-    $c_last_name,
-    $c_gender,
-    $c_birthdate,
-    $c_address,
-    $c_place_of_birth,
-
-    $f_first_name,
-    $f_middle_name,
-    $f_last_name,
-    $f_email,
-
-    $m_first_name,
-    $m_middle_name,
-    $m_last_name,
-    $m_email,
-
-    $g_first_name,
-    $g_middle_name,
-    $g_last_name,
-    $g_email,
-
-    $status,
-
-    $uniqueName,
-    $file_type
-);
+        $stmtM->close();
+    }
 
 
-/*
-|--------------------------------------------------------------------------
-| EXECUTE
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | 4. INSERT GUARDIAN USER ACCOUNT
+    |--------------------------------------------------------------------------
+    */
 
-if ($stmt->execute()) {
+    $defaultPassword = password_hash('password123', PASSWORD_DEFAULT);
+    $role            = 'parent';
+    $userStatus      = 'active';
+
+    $stmtUser = $conn->prepare("
+        INSERT INTO users (
+            first_name,
+            middle_name,
+            last_name,
+            email,
+            password,
+            contact,
+            role,
+            status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmtUser->bind_param(
+        "ssssssss",
+        $g_first_name,
+        $g_middle_name,
+        $g_last_name,
+        $g_email,
+        $defaultPassword,
+        $g_contact,
+        $role,
+        $userStatus
+    );
+
+    if (!$stmtUser->execute()) {
+        throw new Exception('Failed to create guardian account: ' . $stmtUser->error);
+    }
+
+    $user_id = $stmtUser->insert_id;
+    $stmtUser->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 5. UPDATE CHILDREN — LINK PARENT USER
+    |--------------------------------------------------------------------------
+    */
+
+    $stmtLink = $conn->prepare("
+        UPDATE children SET user_id = ? WHERE id = ?
+    ");
+
+    $stmtLink->bind_param("ii", $user_id, $child_id);
+
+    if (!$stmtLink->execute()) {
+        throw new Exception('Failed to link child to guardian: ' . $stmtLink->error);
+    }
+
+    $stmtLink->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 6. INSERT GUARDIAN SA parent_info
+    |--------------------------------------------------------------------------
+    */
+
+    $stmtG = $conn->prepare("
+        INSERT INTO parent_info (
+            user_id,
+            child_id,
+            first_name,
+            middle_name,
+            last_name,
+            relationship,
+            is_primary
+        ) VALUES (?, ?, ?, ?, ?, 'guardian', 1)
+    ");
+
+    $stmtG->bind_param(
+        "iisss",
+        $user_id,
+        $child_id,
+        $g_first_name,
+        $g_middle_name,
+        $g_last_name
+    );
+
+    if (!$stmtG->execute()) {
+        throw new Exception('Failed to save guardian information: ' . $stmtG->error);
+    }
+
+    $stmtG->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 7. INSERT ENROLLMENT
+    |--------------------------------------------------------------------------
+    */
+
+    $enrollmentStatus = 'pending';
+
+    $stmtEnroll = $conn->prepare("
+        INSERT INTO enrollment (
+            child_id,
+            academic_id,
+            status
+        ) VALUES (?, ?, ?)
+    ");
+
+    $stmtEnroll->bind_param(
+        "iis",
+        $child_id,
+        $academic_id,
+        $enrollmentStatus
+    );
+
+    if (!$stmtEnroll->execute()) {
+        throw new Exception('Failed to create enrollment: ' . $stmtEnroll->error);
+    }
+
+    $enrollment_id = $stmtEnroll->insert_id;
+    $stmtEnroll->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 8. INSERT ENROLLMENT DOCUMENTS
+    |--------------------------------------------------------------------------
+    */
+
+    $stmtDoc = $conn->prepare("
+        INSERT INTO enrollment_document (
+            enrollment_id,
+            file_type,
+            file_image
+        ) VALUES (?, ?, ?)
+    ");
+
+    foreach ($uploadedFiles as $doc) {
+
+        $stmtDoc->bind_param(
+            "iss",
+            $enrollment_id,
+            $doc['file_type'],
+            $doc['file_image']
+        );
+
+        if (!$stmtDoc->execute()) {
+            throw new Exception('Failed to save document: ' . $stmtDoc->error);
+        }
+    }
+
+    $stmtDoc->close();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMMIT
+    |--------------------------------------------------------------------------
+    */
+
+    $conn->commit();
 
     echo json_encode([
         'status'  => 'success',
-        'message' => 'Enrollment application submitted successfully.'
+        'message' => 'Enrollment application submitted successfully. Your guardian account has been created — you may now log in using your email and default password "password123".'
     ]);
 
-} else {
+
+} catch (Exception $e) {
 
     /*
     |--------------------------------------------------------------------------
-    | DELETE FILE IF DATABASE INSERT FAILED
+    | ROLLBACK
     |--------------------------------------------------------------------------
     */
 
-    if (file_exists($filePath)) {
+    $conn->rollback();
 
-        unlink($filePath);
 
+    /*
+    |--------------------------------------------------------------------------
+    | CLEANUP UPLOADED FILES
+    |--------------------------------------------------------------------------
+    */
+
+    foreach ($uploadedFiles as $doc) {
+        $path = $uploadDir . $doc['file_image'];
+        if (file_exists($path)) {
+            unlink($path);
+        }
     }
 
 
     echo json_encode([
         'status'  => 'error',
-        'message' => 'Failed to submit enrollment application: ' .
-                     $stmt->error
+        'message' => $e->getMessage()
     ]);
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| CLOSE
-|--------------------------------------------------------------------------
-*/
-
-$stmt->close();
 
 $conn->close();
 
