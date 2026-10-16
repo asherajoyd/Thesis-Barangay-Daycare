@@ -1,5 +1,7 @@
 <?php
 $baseUrl = '/ashera/thesis/app/parent/';
+
+$currentPage = $pageTitle ?? '';
 ?>
 
 <aside class="dashboard-sidebar" id="dashboardSidebar">
@@ -39,9 +41,11 @@ $baseUrl = '/ashera/thesis/app/parent/';
 
             <nav class="sidebar-nav">
 
+                <!-- Dashboard -->
                 <a
                     href="<?= $baseUrl ?>dashboard/"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Dashboard' ? 'active' : '' ?>">
+                    class="sidebar-link <?= $currentPage === 'Dashboard' ? 'active' : '' ?>"
+                >
                     <span class="sidebar-icon">
                         <i class="bi bi-grid-1x2"></i>
                     </span>
@@ -57,22 +61,22 @@ $baseUrl = '/ashera/thesis/app/parent/';
 
 
         <!-- =====================================================
-             DAYCARE
+             MY CHILDREN
         ====================================================== -->
 
         <div class="sidebar-section">
 
             <span class="sidebar-section-title">
-                DAYCARE
+                MY CHILDREN
             </span>
 
             <nav class="sidebar-nav">
 
-
                 <!-- Children -->
                 <a
-                    href="<?= $baseUrl ?>children.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>">
+                    href="<?= $baseUrl ?>children/"
+                    class="sidebar-link <?= $currentPage === 'Children' ? 'active' : '' ?>"
+                >
                     <span class="sidebar-icon">
                         <i class="bi bi-person-hearts"></i>
                     </span>
@@ -82,19 +86,27 @@ $baseUrl = '/ashera/thesis/app/parent/';
                     </span>
                 </a>
 
+
+                <!-- Activities -->
                 <a
-                    href="<?= $baseUrl ?>activities.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Activities' ? 'active' : '' ?>">
+                    href="<?= $baseUrl ?>activities/"
+                    class="sidebar-link <?= $currentPage === 'Activities' ? 'active' : '' ?>"
+                >
                     <span class="sidebar-icon">
                         <i class="bi bi-journal-text"></i>
                     </span>
-                    <span class="sidebar-link-text">Activities</span>
+
+                    <span class="sidebar-link-text">
+                        Activities
+                    </span>
                 </a>
+
 
                 <!-- Attendance -->
                 <a
-                    href="<?= $baseUrl ?>attendance.php"
-                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>">
+                    href="<?= $baseUrl ?>attendance/"
+                    class="sidebar-link <?= $currentPage === 'Attendance' ? 'active' : '' ?>"
+                >
                     <span class="sidebar-icon">
                         <i class="bi bi-calendar-check"></i>
                     </span>
@@ -104,14 +116,40 @@ $baseUrl = '/ashera/thesis/app/parent/';
                     </span>
                 </a>
 
-
-
-
             </nav>
 
         </div>
 
 
+        <!-- =====================================================
+             UPDATES
+        ====================================================== -->
+
+        <div class="sidebar-section">
+
+            <span class="sidebar-section-title">
+                UPDATES
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Announcements -->
+                <a
+                    href="<?= $baseUrl ?>announcement/"
+                    class="sidebar-link <?= $currentPage === 'Announcement' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Announcements
+                    </span>
+                </a>
+
+            </nav>
+
+        </div>
 
     </div>
 
