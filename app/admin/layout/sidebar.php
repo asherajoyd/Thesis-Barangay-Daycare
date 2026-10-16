@@ -88,6 +88,22 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                         Announcement
                     </span>
                 </a>
+
+
+                 <!-- Schedule -->
+                <a
+                    href="<?= $baseUrl ?>schedule/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Schedule' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-calendar-minus"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Schedule
+                    </span>
+                </a>
+
             </nav>
 
         </div>
