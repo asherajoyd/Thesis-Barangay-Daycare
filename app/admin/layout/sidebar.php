@@ -74,6 +74,20 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                     </span>
                 </a>
 
+                <!-- Assign Classes -->
+                <a
+                    href="<?= $baseUrl ?>enrollment/assign-class.php"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Assign Classes' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-person-check-fill"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Assign Classes
+                    </span>
+                </a>
+
 
                 <!-- Announcement -->
                 <a
@@ -212,6 +226,22 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
                         Classes
                     </span>
                 </a>
+
+                <!-- Attendance -->
+                <a
+                    href="<?= $baseUrl ?>attendance/"
+                    class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-file-earmark-check"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Attendance
+                    </span>
+                </a>
+
+
 
 
             </nav>

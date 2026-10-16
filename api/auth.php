@@ -5,7 +5,10 @@ session_start();
 require_once('conn.php');
 
 
-// Only allow POST requests
+// ==========================================================
+// ONLY ALLOW POST REQUESTS
+// ==========================================================
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     echo json_encode([
@@ -17,12 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 
-// Get form data
-$email = trim($_POST['email'] ?? '');
+// ==========================================================
+// GET FORM DATA
+// ==========================================================
+
+$email    = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
 
-// Validate input
+// ==========================================================
+// VALIDATE INPUT
+// ==========================================================
+
 if ($email === '' || $password === '') {
 
     echo json_encode([
@@ -34,7 +43,10 @@ if ($email === '' || $password === '') {
 }
 
 
-// Find user
+// ==========================================================
+// FIND USER
+// ==========================================================
+
 $sql = "
     SELECT
         id,
@@ -43,7 +55,8 @@ $sql = "
         last_name,
         email,
         password,
-        role
+        role,
+        status
     FROM users
     WHERE email = ?
     LIMIT 1
@@ -69,7 +82,10 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 
-// User does not exist
+// ==========================================================
+// USER DOES NOT EXIST
+// ==========================================================
+
 if ($result->num_rows === 0) {
 
     echo json_encode([
@@ -87,7 +103,10 @@ if ($result->num_rows === 0) {
 $user = $result->fetch_assoc();
 
 
-// Verify password
+// ==========================================================
+// VERIFY PASSWORD
+// ==========================================================
+
 if (!password_verify($password, $user['password'])) {
 
     echo json_encode([
@@ -102,31 +121,108 @@ if (!password_verify($password, $user['password'])) {
 }
 
 
-// Regenerate session ID
+// ==========================================================
+// CHECK ACCOUNT STATUS
+// ==========================================================
+
+if ($user['status'] !== 'active') {
+
+    echo json_encode([
+        'success' => false,
+        'message' => 'Your account is inactive. Please contact the administrator.'
+    ]);
+
+    $stmt->close();
+    $conn->close();
+
+    exit;
+}
+
+
+// ==========================================================
+// REGENERATE SESSION ID
+// ==========================================================
+
 session_regenerate_id(true);
 
 
-// Store user information
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['first_name'] = $user['first_name'];
+// ==========================================================
+// STORE USER INFORMATION
+// ==========================================================
+
+$_SESSION['user_id']     = (int) $user['id'];
+$_SESSION['first_name']  = $user['first_name'];
 $_SESSION['middle_name'] = $user['middle_name'];
-$_SESSION['last_name'] = $user['last_name'];
-$_SESSION['email'] = $user['email'];
-$_SESSION['role'] = $user['role'];
+$_SESSION['last_name']   = $user['last_name'];
+$_SESSION['email']       = $user['email'];
+$_SESSION['role']        = $user['role'];
 
-$_SESSION['fullname'] =
-    trim(
-        $user['first_name'] . ' ' .
-        $user['middle_name'] . ' ' .
-        $user['last_name']
-    );
-
+$_SESSION['fullname'] = trim(
+    $user['first_name'] . ' ' .
+    $user['middle_name'] . ' ' .
+    $user['last_name']
+);
 
 
-// Successful login
+// ==========================================================
+// IF TEACHER, ADD teacher_id TO SESSION
+// ==========================================================
+
+if ($user['role'] === 'teacher') {
+
+    $teacherStmt = $conn->prepare("
+        SELECT id FROM teacher WHERE user_id = ? LIMIT 1
+    ");
+
+    if ($teacherStmt) {
+
+        $teacherStmt->bind_param("i", $user['id']);
+        $teacherStmt->execute();
+        $teacherResult = $teacherStmt->get_result();
+
+        if ($teacherResult->num_rows > 0) {
+            $teacherRow = $teacherResult->fetch_assoc();
+            $_SESSION['teacher_id'] = (int) $teacherRow['id'];
+        }
+
+        $teacherStmt->close();
+    }
+}
+
+
+// ==========================================================
+// IF PARENT, ADD parent-related IDs TO SESSION (optional)
+// ==========================================================
+
+if ($user['role'] === 'parent') {
+
+    $childStmt = $conn->prepare("
+        SELECT id FROM children WHERE user_id = ? LIMIT 1
+    ");
+
+    if ($childStmt) {
+
+        $childStmt->bind_param("i", $user['id']);
+        $childStmt->execute();
+        $childResult = $childStmt->get_result();
+
+        if ($childResult->num_rows > 0) {
+            $childRow = $childResult->fetch_assoc();
+            $_SESSION['child_id'] = (int) $childRow['id'];
+        }
+
+        $childStmt->close();
+    }
+}
+
+
+// ==========================================================
+// SUCCESSFUL LOGIN
+// ==========================================================
+
 echo json_encode([
-    'success' => true,
-    'message' => 'Login successful.',
+    'success'  => true,
+    'message'  => 'Login successful.',
     'redirect' => 'app/index.php'
 ]);
 

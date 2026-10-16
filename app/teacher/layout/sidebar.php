@@ -77,39 +77,6 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
         </div>
 
 
-        <!-- =====================================================
-             DAYCARE
-        ====================================================== -->
-
-        <div class="sidebar-section">
-
-            <span class="sidebar-section-title">
-                DAYCARE
-            </span>
-
-            <nav class="sidebar-nav">
-
-                <!-- Parents -->
-                <a href="/ashera/thesis/app/teacher/parents/" class="sidebar-link <?= ($pageTitle ?? '') === 'Parents List' ? 'active' : '' ?>">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-people"></i>
-                    </span>
-                    <span class="sidebar-link-text">Parents</span>
-                </a>
-
-                <!-- Children -->
-                <a href="/ashera/thesis/app/teacher/children/" class="sidebar-link <?= ($pageTitle ?? '') === 'Children' ? 'active' : '' ?>">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-person-hearts"></i>
-                    </span>
-                    <span class="sidebar-link-text">Children</span>
-                </a>
-
-            </nav>
-
-        </div>
-
-
 
 
 
@@ -122,6 +89,17 @@ $classManagementIsActive = in_array($pageTitle ?? '', $classManagementPages, tru
             <span class="sidebar-section-title">
                 RECORDS
             </span>
+
+
+             <!-- Attendance -->
+
+            <a href="/ashera/thesis/app/teacher/attendance/" class="sidebar-link <?= ($pageTitle ?? '') === 'Attendance' ? 'active' : '' ?>">
+                <span class="sidebar-icon">
+                    <i class="bi bi-calendar-range"></i>
+                </span>
+                <span class="sidebar-link-text">Attendance</span>
+            </a>
+
 
             <!-- Schedule -->
 

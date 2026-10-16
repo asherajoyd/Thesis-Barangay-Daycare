@@ -1,2452 +1,525 @@
 <?php
 
+$pageTitle = "Attendance";
+
+require_once '../guard.php';
+include "../../../api/conn.php";
 
 
-    $pageTitle = "Attendance";
-
-    require_once '../guard.php';
-
-    include '../../../api/conn.php';
-
+function e($value)
+{
+    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+}
 
 
-    /* =========================================================
+// ==========================================================
+// CHECK TEACHER ID IN SESSION
+// ==========================================================
 
-    HELPER FUNCTIONS
+if (empty($_SESSION['teacher_id'])) {
 
-    ========================================================= */
+    $_SESSION['status']  = "danger";
+    $_SESSION['message'] = "Teacher profile not found. Please contact the administrator.";
+
+    header("Location: ../dashboard/index.php");
+    exit();
+}
+
+$teacherId = (int) $_SESSION['teacher_id'];
 
 
+// ==========================================================
+// GET CURRENT ACTIVE ACADEMIC YEAR
+// ==========================================================
 
-    /**
+$currentYear = null;
 
-     * Safely escape output for HTML.
+$result = $conn->query("
+    SELECT id, academic_year, status
+    FROM academic_year
+    WHERE status = 'active'
+    ORDER BY id DESC
+    LIMIT 1
+");
 
-     */
+if ($result && $result->num_rows > 0) {
+    $currentYear = $result->fetch_assoc();
+}
 
-    function clean($value)
 
-    {
+// ==========================================================
+// DETERMINE FILTERS
+// ==========================================================
 
-        return htmlspecialchars(
+$filterAcademicId = isset($_GET['academic_id'])
+    ? (int) $_GET['academic_id']
+    : 0;
 
-            $value ?? '',
+if ($filterAcademicId <= 0 && $currentYear) {
+    $filterAcademicId = (int) $currentYear['id'];
+}
 
-            ENT_QUOTES,
+$filterClassId = isset($_GET['class_id'])
+    ? (int) $_GET['class_id']
+    : 0;
 
-            'UTF-8'
+$filterDate = isset($_GET['date']) && $_GET['date'] !== ''
+    ? $_GET['date']
+    : date('Y-m-d');
 
-        );
 
+// ==========================================================
+// GET TEACHER'S CLASSES (filtered by teacher_id)
+// ==========================================================
+
+$classes = [];
+
+if ($filterAcademicId > 0) {
+
+    $stmt = $conn->prepare("
+        SELECT
+            cl.id,
+            cl.name,
+            cl.session_id,
+            s.name AS session_name,
+            s.start_time,
+            s.end_time,
+            (SELECT COUNT(*)
+             FROM enrollment e
+             WHERE e.class_id = cl.id
+               AND e.status = 'approved') AS enrolled_count
+        FROM class cl
+        LEFT JOIN session s ON s.id = cl.session_id
+        WHERE cl.academic_id = ?
+          AND cl.status = 'active'
+          AND cl.teacher_id = ?
+        ORDER BY s.start_time ASC, cl.name ASC
+    ");
+
+    $stmt->bind_param("ii", $filterAcademicId, $teacherId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $classes[] = $row;
     }
 
+    $stmt->close();
+}
 
 
-    /**
+// ==========================================================
+// GET STUDENTS + EXISTING ATTENDANCE
+// ==========================================================
 
-     * Redirect back to attendance page.
+$students = [];
 
-     */
+if ($filterClassId > 0 && $filterDate) {
 
-    function redirectToAttendance()
+    // Verify class belongs to this teacher
+    $verifyStmt = $conn->prepare("
+        SELECT id FROM class
+        WHERE id = ? AND teacher_id = ?
+        LIMIT 1
+    ");
 
-    {
+    $verifyStmt->bind_param("ii", $filterClassId, $teacherId);
+    $verifyStmt->execute();
+    $verifyStmt->store_result();
 
-        header("Location: index.php");
-
+    if ($verifyStmt->num_rows === 0) {
+        $verifyStmt->close();
+        header("Location: index.php?academic_id=" . $filterAcademicId);
         exit();
-
     }
 
+    $verifyStmt->close();
 
 
-    /**
-
-     * Get student name by student ID.
-
-     */
-
-    function getStudent($conn, $studentId)
-
-    {
-
-        $query = $conn->prepare("
-
-            SELECT
-
-                children.id,
-
-                TRIM(
-
-                    CONCAT(
-
-                        enrollment.c_first_name,
-
-                        ' ',
-
-                        COALESCE(enrollment.c_middle_name, ''),
-
-                        ' ',
-
-                        enrollment.c_last_name
-
-                    )
-
-                ) AS student_name
-
-            FROM children
-
-            INNER JOIN enrollment
-
-                ON children.enrollment_id = enrollment.id
-
-            WHERE children.id = ?
-
-        ");
-
-
-
-        $query->bind_param("i", $studentId);
-
-        $query->execute();
-
-
-
-        $result = $query->get_result();
-
-        $student = $result->fetch_assoc();
-
-
-
-        $query->close();
-
-
-
-        return $student ?: null;
-
-    }
-
-
-
-
-
-    /* =========================================================
-
-    ADD ATTENDANCE
-
-    ========================================================= */
-
-
-
-    if (isset($_POST['add_attendance'])) {
-
-
-
-        $studentId = intval($_POST['student_id']);
-
-        $attendanceDate = $_POST['attendance_date'];
-
-        $status = $_POST['status'];
-
-        $reason = trim($_POST['reason']);
-
-
-
-        // Get student information.
-
-        $student = getStudent($conn, $studentId);
-
-
-
-        if (!$student) {
-
-
-
-            $_SESSION['error'] = "Student not found.";
-
-
-
-            redirectToAttendance();
-
-        }
-
-
-
-        $studentName = $student['student_name'];
-
-
-
-        // Check if attendance already exists.
-
-        $check = $conn->prepare("
-
-            SELECT id
-
-            FROM attendance
-
-            WHERE student_id = ?
-
-            AND attendance_date = ?
-
-        ");
-
-
-
-        $check->bind_param(
-
-            "is",
-
-            $studentId,
-
-            $attendanceDate
-
-        );
-
-
-
-        $check->execute();
-
-
-
-        $checkResult = $check->get_result();
-
-
-
-        if ($checkResult->num_rows > 0) {
-
-
-
-            $_SESSION['error'] =
-
-                "This student already has an attendance record for this date.";
-
-
-
-            $check->close();
-
-
-
-            redirectToAttendance();
-
-        }
-
-
-
-        $check->close();
-
-
-
-        // Insert attendance record.
-
-        $insert = $conn->prepare("
-
-            INSERT INTO attendance (
-
-                student_name,
-
-                student_id,
-
-                attendance_date,
-
-                status,
-
-                reason
-
-            )
-
-            VALUES (?, ?, ?, ?, ?)
-
-        ");
-
-
-
-        $insert->bind_param(
-
-            "sisss",
-
-            $studentName,
-
-            $studentId,
-
-            $attendanceDate,
-
-            $status,
-
-            $reason
-
-        );
-
-
-
-        if ($insert->execute()) {
-
-
-
-            $_SESSION['success'] =
-
-                "Attendance added successfully.";
-
-
-
-        } else {
-
-
-
-            $_SESSION['error'] =
-
-                "Error adding attendance: " . $conn->error;
-
-        }
-
-
-
-        $insert->close();
-
-
-
-        redirectToAttendance();
-
-    }
-
-
-
-
-
-    /* =========================================================
-
-    UPDATE ATTENDANCE
-
-    ========================================================= */
-
-
-
-    if (isset($_POST['update_attendance'])) {
-
-
-
-        $id = intval($_POST['id']);
-
-        $studentId = intval($_POST['student_id']);
-
-        $attendanceDate = $_POST['attendance_date'];
-
-        $status = $_POST['status'];
-
-        $reason = trim($_POST['reason']);
-
-
-
-        // Get updated student information.
-
-        $student = getStudent($conn, $studentId);
-
-
-
-        if (!$student) {
-
-
-
-            $_SESSION['error'] = "Student not found.";
-
-
-
-            redirectToAttendance();
-
-        }
-
-
-
-        $studentName = $student['student_name'];
-
-
-
-        // Check for duplicate attendance.
-
-        // Ignore the current attendance record.
-
-        $check = $conn->prepare("
-
-            SELECT id
-
-            FROM attendance
-
-            WHERE student_id = ?
-
-            AND attendance_date = ?
-
-            AND id != ?
-
-        ");
-
-
-
-        $check->bind_param(
-
-            "isi",
-
-            $studentId,
-
-            $attendanceDate,
-
-            $id
-
-        );
-
-
-
-        $check->execute();
-
-
-
-        $checkResult = $check->get_result();
-
-
-
-        if ($checkResult->num_rows > 0) {
-
-
-
-            $_SESSION['error'] =
-
-                "This student already has an attendance record for this date.";
-
-
-
-            $check->close();
-
-
-
-            redirectToAttendance();
-
-        }
-
-
-
-        $check->close();
-
-
-
-        // Update attendance record.
-
-        $update = $conn->prepare("
-
-            UPDATE attendance
-
-            SET
-
-                student_name = ?,
-
-                student_id = ?,
-
-                attendance_date = ?,
-
-                status = ?,
-
-                reason = ?
-
-            WHERE id = ?
-
-        ");
-
-
-
-        $update->bind_param(
-
-            "sisssi",
-
-            $studentName,
-
-            $studentId,
-
-            $attendanceDate,
-
-            $status,
-
-            $reason,
-
-            $id
-
-        );
-
-
-
-        if ($update->execute()) {
-
-
-
-            $_SESSION['success'] =
-
-                "Attendance updated successfully.";
-
-
-
-        } else {
-
-
-
-            $_SESSION['error'] =
-
-                "Error updating attendance: " . $conn->error;
-
-        }
-
-
-
-        $update->close();
-
-
-
-        redirectToAttendance();
-
-    }
-
-
-
-
-
-    /* =========================================================
-
-    DELETE ATTENDANCE
-
-    ========================================================= */
-
-
-
-    if (isset($_GET['delete'])) {
-
-
-
-        $id = intval($_GET['delete']);
-
-
-
-        $delete = $conn->prepare("
-
-            DELETE FROM attendance
-
-            WHERE id = ?
-
-        ");
-
-
-
-        $delete->bind_param("i", $id);
-
-
-
-        if ($delete->execute()) {
-
-
-
-            $_SESSION['success'] =
-
-                "Attendance deleted successfully.";
-
-
-
-        } else {
-
-
-
-            $_SESSION['error'] =
-
-                "Error deleting attendance: " . $conn->error;
-
-        }
-
-
-
-        $delete->close();
-
-
-
-        redirectToAttendance();
-
-    }
-
-
-
-
-
-    /* =========================================================
-
-    GET STUDENTS
-
-    ========================================================= */
-
-
-
-    $students = $conn->query("
-
+    // Get students
+    $stmt = $conn->prepare("
         SELECT
+            e.id AS enrollment_id,
+            e.class_id,
 
-            children.id,
+            c.id AS child_id,
+            c.first_name,
+            c.middle_name,
+            c.last_name,
+            c.gender,
+            c.birthdate,
 
-            TRIM(
+            a.id AS attendance_id,
+            a.status AS attendance_status,
+            a.remarks AS attendance_remarks
 
-                CONCAT(
+        FROM enrollment e
+        INNER JOIN children c ON c.id = e.child_id
+        LEFT JOIN attendance a
+            ON a.enrollment_id = e.id
+            AND a.date = ?
 
-                    enrollment.c_first_name,
+        WHERE e.class_id = ?
+          AND e.status = 'approved'
 
-                    ' ',
-
-                    COALESCE(enrollment.c_middle_name, ''),
-
-                    ' ',
-
-                    enrollment.c_last_name
-
-                )
-
-            ) AS student_name
-
-        FROM children
-
-        INNER JOIN enrollment
-
-            ON children.enrollment_id = enrollment.id
-
-        ORDER BY
-
-            enrollment.c_last_name ASC,
-
-            enrollment.c_first_name ASC
-
+        ORDER BY c.last_name ASC, c.first_name ASC
     ");
 
-
-
-
-
-    /* =========================================================
-
-    GET ATTENDANCE RECORDS
-
-    ========================================================= */
-
-
-
-    $attendance = $conn->query("
-
-        SELECT
-
-            id,
-
-            student_id,
-
-            student_name,
-
-            attendance_date,
-
-            status,
-
-            reason
-
-        FROM attendance
-
-        ORDER BY
-
-            attendance_date DESC,
-
-            student_name ASC
-
-    ");
-
-
-
-
-
-    /* =========================================================
-
-    GET RECORD FOR EDIT
-
-    ========================================================= */
-
-
-
-    $editRecord = null;
-
-
-
-    if (isset($_GET['edit'])) {
-
-
-
-        $editId = intval($_GET['edit']);
-
-
-
-        $editQuery = $conn->prepare("
-
-            SELECT
-
-                id,
-
-                student_id,
-
-                student_name,
-
-                attendance_date,
-
-                status,
-
-                reason
-
-            FROM attendance
-
-            WHERE id = ?
-
-        ");
-
-
-
-        $editQuery->bind_param("i", $editId);
-
-        $editQuery->execute();
-
-
-
-        $editResult = $editQuery->get_result();
-
-
-
-        if ($editResult->num_rows > 0) {
-
-            $editRecord = $editResult->fetch_assoc();
-
-        }
-
-
-
-        $editQuery->close();
-
+    $stmt->bind_param("si", $filterDate, $filterClassId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $students[] = $row;
     }
 
-    include '../layout/header.php';
+    $stmt->close();
+}
 
 
+// ==========================================================
+// GET SELECTED CLASS INFO
+// ==========================================================
+
+$selectedClass = null;
+
+foreach ($classes as $c) {
+    if ((int) $c['id'] === $filterClassId) {
+        $selectedClass = $c;
+        break;
+    }
+}
+
+
+include '../layout/header.php';
 
 ?>
 
+<div class="attendance-page">
 
+    <!-- ALERTS -->
+    <?php if (!empty($_SESSION['message'])): ?>
 
+        <div class="fw-semibold alert alert-<?= ($_SESSION['status'] ?? '') === 'success' ? 'success' : (($_SESSION['status'] ?? '') === 'warning' ? 'warning' : 'danger'); ?> alert-dismissible fade show" role="alert">
+            <?= e($_SESSION['message']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
+        <?php unset($_SESSION['status'], $_SESSION['message']); ?>
 
+    <?php endif; ?>
 
 
-<style>
+    <!-- PAGE HEADER -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
 
+        <div>
+            <h2 class="fw-bold fs-4 mb-1"><?= e($pageTitle) ?></h2>
+            <p class="text-muted small mb-0">Record daily attendance for your classes</p>
+        </div>
 
-
-    :root {
-
-
-
-        --primary: #176b3a;
-
-        --primary-dark: #0f542c;
-
-        --primary-light: #e7f0eb;
-
-
-
-        --text: #17221c;
-
-        --muted: #6f7b74;
-
-
-
-        --border: #e1e7e3;
-
-
-
-        --background: #f5f8f6;
-
-
-
-        --white: #ffffff;
-
-    }
-
-
-
-    /* =====================================================
-
-        ATTENDANCE CARD
-
-    ====================================================== */
-
-
-
-    .attendance-card {
-
-
-
-        background-color: var(--white);
-
-
-
-        border: 1px solid var(--border);
-
-
-
-        border-radius: 12px;
-
-
-
-        box-shadow: none;
-
-
-
-        margin-bottom: 24px;
-
-
-
-        overflow: hidden;
-
-    }
-
-
-
-
-
-    .attendance-card-header {
-
-
-
-        padding: 20px 24px;
-
-
-
-        border-bottom: 1px solid var(--border);
-
-
-
-        display: flex;
-
-
-
-        align-items: center;
-
-
-
-        justify-content: space-between;
-
-
-
-        gap: 20px;
-
-    }
-
-
-
-
-
-    .attendance-card-title {
-
-
-
-        margin: 0;
-
-
-
-        font-size: 16px;
-
-
-
-        font-weight: 600;
-
-
-
-        color: #17221c;
-
-    }
-
-
-
-
-
-    .attendance-card-title i {
-
-
-
-        color: var(--primary);
-
-
-
-        margin-right: 8px;
-
-    }
-
-
-
-
-
-    .attendance-card-body {
-
-
-
-        padding: 24px;
-
-    }
-
-
-
-
-
-
-
-    /* =====================================================
-
-        SEARCH
-
-    ====================================================== */
-
-
-
-    .search-wrapper {
-
-
-
-        position: relative;
-
-
-
-        width: 300px;
-
-
-
-        max-width: 100%;
-
-    }
-
-
-
-
-
-    .search-wrapper i {
-
-
-
-        position: absolute;
-
-
-
-        left: 13px;
-
-
-
-        top: 50%;
-
-
-
-        transform: translateY(-50%);
-
-
-
-        color: #7d8881;
-
-
-
-        z-index: 2;
-
-    }
-
-
-
-
-
-    .search-wrapper input {
-
-
-
-        padding-left: 40px !important;
-
-    }
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-    /* =====================================================
-
-        STATUS BADGES
-
-    ====================================================== */
-
-
-
-    .attendance-badge {
-
-
-
-        display: inline-flex;
-
-
-
-        align-items: center;
-
-
-
-        padding: 5px 10px;
-
-
-
-        border-radius: 20px;
-
-
-
-        font-size: 12px;
-
-
-
-        font-weight: 600;
-
-    }
-
-
-
-
-
-    .badge-present {
-
-
-
-        background-color: #e6f4eb;
-
-
-
-        color: #176b3a;
-
-    }
-
-
-
-
-
-    .badge-absent {
-
-
-
-        background-color: #fdeaea;
-
-
-
-        color: #c53030;
-
-    }
-
-
-
-
-
-    .badge-late {
-
-
-
-        background-color: #fff4d8;
-
-
-
-        color: #956d00;
-
-    }
-
-
-
-
-
-    .badge-excused {
-
-
-
-        background-color: #edf0f2;
-
-
-
-        color: #66717a;
-
-    }
-
-
-
-
-
-    /* =====================================================
-
-        ACTION BUTTONS
-
-    ====================================================== */
-
-
-
-    .action-btn {
-
-
-
-        width: 34px;
-
-        height: 34px;
-
-
-
-        padding: 0;
-
-
-
-        display: inline-flex;
-
-
-
-        align-items: center;
-
-
-
-        justify-content: center;
-
-
-
-        border-radius: 7px;
-
-    }
-
-
-
-
-
-    .btn-outline-primary {
-
-
-
-        color: var(--primary);
-
-
-
-        border-color: #b9d2c2;
-
-    }
-
-
-
-
-
-    .btn-outline-primary:hover {
-
-
-
-        background-color: var(--primary);
-
-
-
-        border-color: var(--primary);
-
-
-
-        color: white;
-
-    }
-
-
-
-
-
-    /* =====================================================
-
-        MOBILE
-
-    ====================================================== */
-
-
-
-    @media (max-width: 991px) {
-
-
-
-        .dashboard-sidebar {
-
-
-
-            width: 230px;
-
-        }
-
-
-
-
-
-        .dashboard-main {
-
-
-
-            width: calc(100% - 230px);
-
-
-
-            margin-left: 230px;
-
-        }
-
-
-
-
-
-        .dashboard-header {
-
-
-
-            padding: 0 25px;
-
-        }
-
-
-
-
-
-        .dashboard-content {
-
-
-
-            padding: 30px 25px;
-
-        }
-
-
-
-    }
-
-
-
-
-
-    @media (max-width: 767px) {
-
-
-
-        .dashboard-wrapper {
-
-
-
-            display: block;
-
-        }
-
-
-
-
-
-        .dashboard-sidebar {
-
-
-
-            position: relative;
-
-
-
-            width: 100%;
-
-
-
-            min-height: auto;
-
-        }
-
-
-
-
-
-        .dashboard-main {
-
-
-
-            width: 100%;
-
-
-
-            margin-left: 0;
-
-        }
-
-
-
-
-
-        .dashboard-header {
-
-
-
-            height: auto;
-
-
-
-            min-height: 70px;
-
-
-
-            padding: 15px 20px;
-
-        }
-
-
-
-
-
-        .dashboard-content {
-
-
-
-            padding: 25px 20px;
-
-        }
-
-
-
-
-
-        .sidebar-user {
-
-
-
-            display: none;
-
-        }
-
-
-
-
-
-        .header-user-info,
-
-        .header-chevron {
-
-
-
-            display: none;
-
-        }
-
-
-
-
-
-        .attendance-card-header {
-
-
-
-            align-items: flex-start;
-
-
-
-            flex-direction: column;
-
-        }
-
-
-
-
-
-        .search-wrapper {
-
-
-
-            width: 100%;
-
-        }
-
-
-
-    }
-
-
-
-</style>
-
-
-
-
-
-
-
-<!-- =========================================================
-
-     PAGE HEADING
-
-========================================================= -->
-
-
-
-<div>
-
-
-
-    <h2 class="fw-bold fs-4 mb-0">Manage Attendance</h2>
-
-
-
-    <p>
-
-        Manage student attendance records
-
-    </p>
-
-
-
-</div>
-
-
-
-
-
-<!-- =========================================================
-
-     SUCCESS MESSAGE
-
-========================================================= -->
-
-
-
-<?php if (isset($_SESSION['success'])): ?>
-
-
-
-    <div
-
-        class="alert alert-success alert-dismissible fade show"
-
-        role="alert"
-
-    >
-
-        <i class="bi bi-check-circle me-2"></i>
-
-
-
-        <?= clean($_SESSION['success']) ?>
-
-
-
-        <button
-
-            type="button"
-
-            class="btn-close"
-
-            data-bs-dismiss="alert"
-
-        ></button>
+        <a href="history.php?class_id=<?= (int) $filterClassId ?>&academic_id=<?= (int) $filterAcademicId ?>"
+           class="btn btn-outline-primary">
+            <i class="bi bi-clock-history me-1"></i>
+            History
+        </a>
 
     </div>
 
 
+    <!-- FILTERS -->
+    <div class="card mb-3">
+        <div class="card-body">
 
-    <?php unset($_SESSION['success']); ?>
+            <form method="GET">
 
+                <div class="row g-3 align-items-end">
 
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small mb-1">Academic Year</label>
+                        <select name="academic_id" class="form-select form-select-sm"
+                                onchange="this.form.submit()">
+                            <?php
+                            $yearsResult = $conn->query("
+                                SELECT id, academic_year, status
+                                FROM academic_year
+                                ORDER BY status DESC, start_date DESC, id DESC
+                            ");
+                            while ($y = $yearsResult->fetch_assoc()):
+                            ?>
+                                <option value="<?= (int) $y['id'] ?>"
+                                    <?= $filterAcademicId === (int) $y['id'] ? 'selected' : '' ?>>
+                                    <?= e($y['academic_year']) ?>
+                                    <?= $y['status'] === 'active' ? ' (Active)' : '' ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
 
-<?php endif; ?>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small mb-1">Class</label>
+                        <select name="class_id" class="form-select form-select-sm" required>
+                            <option value="">— Select class —</option>
+                            <?php foreach ($classes as $c): ?>
+                                <option value="<?= (int) $c['id'] ?>"
+                                    <?= $filterClassId === (int) $c['id'] ? 'selected' : '' ?>>
+                                    <?= e($c['name']) ?>
+                                    (<?= e($c['session_name']) ?>)
+                                    [<?= (int) $c['enrolled_count'] ?>]
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small mb-1">Date</label>
+                        <input type="date" name="date" class="form-control form-control-sm"
+                               value="<?= e($filterDate) ?>">
+                    </div>
 
+                    <div class="col-12 col-md-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
 
+                </div>
 
+            </form>
 
-<!-- =========================================================
-
-     ERROR MESSAGE
-
-========================================================= -->
-
-
-
-<?php if (isset($_SESSION['error'])): ?>
-
-
-
-    <div
-
-        class="alert alert-danger alert-dismissible fade show"
-
-        role="alert"
-
-    >
-
-        <i class="bi bi-exclamation-circle me-2"></i>
-
-
-
-        <?= clean($_SESSION['error']) ?>
-
-
-
-        <button
-
-            type="button"
-
-            class="btn-close"
-
-            data-bs-dismiss="alert"
-
-        ></button>
-
+        </div>
     </div>
 
 
-
-    <?php unset($_SESSION['error']); ?>
-
-
-
-<?php endif; ?>
-
-
-
-
-
-<!-- =========================================================
-
-     ADD / EDIT ATTENDANCE
-
-========================================================= -->
-
-
-
-<div class="attendance-card">
-
-
-
-    <div class="attendance-card-header">
-
-
-
-        <h2 class="attendance-card-title">
-
-
-
-            <?php if ($editRecord): ?>
-
-
-
-                <i class="bi bi-pencil-square"></i>
-
-                Edit Attendance
-
-
-
-            <?php else: ?>
-
-
-
-                <i class="bi bi-plus-circle"></i>
-
-                Add Attendance
-
-
-
-            <?php endif; ?>
-
-
-
-        </h2>
-
-
-
-    </div>
-
-
-
-
-
-    <div class="attendance-card-body">
-
-
-
-        <form method="POST">
-
-
-
-            <?php if ($editRecord): ?>
-
-
-
-                <input
-
-                    type="hidden"
-
-                    name="id"
-
-                    value="<?= $editRecord['id'] ?>"
-
-                >
-
-
-
-            <?php endif; ?>
-
-
-
-
-
-            <div class="row g-4">
-
-
-
-                <!-- STUDENT -->
-
-
-
-                <div class="col-md-6">
-
-
-
-                    <label class="form-label fw-semibold">
-
-                        Student
-
-                    </label>
-
-
-
-                    <select
-
-                        name="student_id"
-
-                        class="form-select"
-
-                        required
-
-                    >
-
-
-
-                        <option value="">
-
-                            Select Student
-
-                        </option>
-
-
-
-                        <?php while ($student = $students->fetch_assoc()): ?>
-
-
-
-                            <option
-
-                                value="<?= $student['id'] ?>"
-
-                                <?=
-
-                                    (
-
-                                        $editRecord &&
-
-                                        $student['id'] == $editRecord['student_id']
-
-                                    )
-
-                                        ? 'selected'
-
-                                        : ''
-
+    <?php if (empty($classes)): ?>
+
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox fs-2 text-muted"></i>
+                <h6 class="fw-semibold mt-2">No Classes Assigned</h6>
+                <p class="text-muted small mb-0">
+                    Wala kang naka-assign na class sa academic year na ito.
+                    Please contact the administrator.
+                </p>
+            </div>
+        </div>
+
+    <?php elseif ($selectedClass && !empty($students)): ?>
+
+        <!-- CLASS INFO + BULK ACTIONS -->
+        <div class="card mb-3">
+            <div class="card-body">
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+                    <div>
+                        <div class="text-primary text-uppercase fw-bold small">Recording Attendance</div>
+                        <div class="fw-bold fs-5">
+                            <?= e($selectedClass['name']) ?>
+                            <small class="text-muted fw-normal">
+                                (<?= e($selectedClass['session_name']) ?>)
+                            </small>
+                        </div>
+                        <small class="text-muted">
+                            <?= e(date('F d, Y', strtotime($filterDate))) ?>
+                            •
+                            <?= e(date('h:i A', strtotime($selectedClass['start_time']))) ?>
+                            –
+                            <?= e(date('h:i A', strtotime($selectedClass['end_time']))) ?>
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="markAllPresentBtn"
+                                class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-check2-all me-1"></i>
+                            Mark All Present
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ATTENDANCE FORM -->
+        <form method="POST" action="save.php" id="attendanceForm">
+
+            <input type="hidden" name="class_id" value="<?= (int) $filterClassId ?>">
+            <input type="hidden" name="date" value="<?= e($filterDate) ?>">
+            <input type="hidden" name="academic_id" value="<?= (int) $filterAcademicId ?>">
+
+            <div class="card p-0">
+
+                <div class="card-header bg-paper border-bottom p-3">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-people text-primary me-2"></i>
+                            Students
+                        </h6>
+                        <span class="badge bg-paper-soft text-secondary border">
+                            <?= count($students) ?> student<?= count($students) !== 1 ? 's' : '' ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table mb-0 align-middle">
+
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Student</th>
+                                <th class="text-center" style="width: 70px;">
+                                    <span class="badge bg-success">P</span>
+                                </th>
+                                <th class="text-center" style="width: 70px;">
+                                    <span class="badge bg-danger">A</span>
+                                </th>
+                                <th class="text-center" style="width: 70px;">
+                                    <span class="badge bg-warning text-dark">L</span>
+                                </th>
+                                <th class="text-center" style="width: 70px;">
+                                    <span class="badge bg-info">E</span>
+                                </th>
+                                <th style="min-width: 200px;">Remarks</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <?php foreach ($students as $i => $s): ?>
+
+                                <?php
+                                $studentName = trim(
+                                    $s['first_name'] . ' ' .
+                                    $s['middle_name'] . ' ' .
+                                    $s['last_name']
+                                );
+
+                                $currentStatus = $s['attendance_status'] ?? 'present';
                                 ?>
 
-                            >
+                                <tr>
 
-                                <?= clean($student['student_name']) ?>
+                                    <td><?= $i + 1 ?></td>
 
-                            </option>
+                                    <td>
+                                        <div class="fw-semibold"><?= e($studentName) ?></div>
+                                        <small class="text-muted text-capitalize">
+                                            <?= e($s['gender']) ?>
+                                            <?php if (!empty($s['birthdate'])): ?>
+                                                • <?= e(date('M d, Y', strtotime($s['birthdate']))) ?>
+                                            <?php endif; ?>
+                                        </small>
+                                    </td>
 
+                                    <td class="text-center">
+                                        <input type="radio"
+                                               name="status[<?= (int) $s['enrollment_id'] ?>]"
+                                               value="present"
+                                               class="form-check-input attendance-radio"
+                                               <?= $currentStatus === 'present' ? 'checked' : '' ?>>
+                                    </td>
 
+                                    <td class="text-center">
+                                        <input type="radio"
+                                               name="status[<?= (int) $s['enrollment_id'] ?>]"
+                                               value="absent"
+                                               class="form-check-input attendance-radio"
+                                               <?= $currentStatus === 'absent' ? 'checked' : '' ?>>
+                                    </td>
 
-                        <?php endwhile; ?>
+                                    <td class="text-center">
+                                        <input type="radio"
+                                               name="status[<?= (int) $s['enrollment_id'] ?>]"
+                                               value="late"
+                                               class="form-check-input attendance-radio"
+                                               <?= $currentStatus === 'late' ? 'checked' : '' ?>>
+                                    </td>
 
+                                    <td class="text-center">
+                                        <input type="radio"
+                                               name="status[<?= (int) $s['enrollment_id'] ?>]"
+                                               value="excused"
+                                               class="form-check-input attendance-radio"
+                                               <?= $currentStatus === 'excused' ? 'checked' : '' ?>>
+                                    </td>
 
+                                    <td>
+                                        <input type="text"
+                                               name="remarks[<?= (int) $s['enrollment_id'] ?>]"
+                                               class="form-control form-control-sm"
+                                               placeholder="Optional"
+                                               maxlength="255"
+                                               value="<?= e($s['attendance_remarks'] ?? '') ?>">
+                                    </td>
 
-                    </select>
+                                </tr>
 
+                            <?php endforeach; ?>
 
+                        </tbody>
+
+                    </table>
 
                 </div>
 
-
-
-
-
-                <!-- ATTENDANCE DATE -->
-
-
-
-                <div class="col-md-6">
-
-
-
-                    <label class="form-label fw-semibold">
-
-                        Attendance Date
-
-                    </label>
-
-
-
-                    <input
-
-                        type="date"
-
-                        name="attendance_date"
-
-                        class="form-control"
-
-                        value="<?=
-
-                            $editRecord
-
-                                ? clean($editRecord['attendance_date'])
-
-                                : date('Y-m-d')
-
-                        ?>"
-
-                        required
-
-                    >
-
-
-
-                </div>
-
-
-
-
-
-                <!-- STATUS -->
-
-
-
-                <div class="col-md-6">
-
-
-
-                    <label class="form-label fw-semibold">
-
-                        Status
-
-                    </label>
-
-
-
-                    <select
-
-                        name="status"
-
-                        class="form-select"
-
-                        required
-
-                    >
-
-
-
-                        <option value="">
-
-                            Select Status
-
-                        </option>
-
-
-
-                        <?php
-
-                        $statuses = [
-
-                            'Present',
-
-                            'Absent',
-
-                            'Late',
-
-                            'Excused'
-
-                        ];
-
-                        ?>
-
-
-
-                        <?php foreach ($statuses as $statusOption): ?>
-
-
-
-                            <option
-
-                                value="<?= $statusOption ?>"
-
-                                <?=
-
-                                    (
-
-                                        $editRecord &&
-
-                                        $editRecord['status'] === $statusOption
-
-                                    )
-
-                                        ? 'selected'
-
-                                        : ''
-
-                                ?>
-
-                            >
-
-                                <?= $statusOption ?>
-
-                            </option>
-
-
-
-                        <?php endforeach; ?>
-
-
-
-                    </select>
-
-
-
-                </div>
-
-
-
-
-
-                <!-- REASON -->
-
-
-
-                <div class="col-md-6">
-
-
-
-                    <label class="form-label fw-semibold">
-
-                        Reason
-
-                    </label>
-
-
-
-                    <input
-
-                        type="text"
-
-                        name="reason"
-
-                        class="form-control"
-
-                        value="<?=
-
-                            $editRecord
-
-                                ? clean($editRecord['reason'])
-
-                                : ''
-
-                        ?>"
-
-                        placeholder="Optional"
-
-                    >
-
-
-
-                </div>
-
-
-
-
-
-                <!-- BUTTONS -->
-
-
-
-                <div class="col-12">
-
-
-
-                    <?php if ($editRecord): ?>
-
-
-
-                        <button
-
-                            type="submit"
-
-                            name="update_attendance"
-
-                            class="btn btn-primary"
-
-                        >
-
-                            <i class="bi bi-save me-1"></i>
-
-                            Update Attendance
-
+                <div class="card-footer bg-white border-top p-3">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Save Attendance
                         </button>
-
-
-
-                        <a
-
-                            href="<?= $baseUrl ?>attendance"
-
-                            class="btn btn-secondary ms-1"
-
-                        >
-
-                            <i class="bi bi-x-circle me-1"></i>
-
-                            Cancel
-
-                        </a>
-
-
-
-                    <?php else: ?>
-
-
-
-                        <button
-
-                            type="submit"
-
-                            name="add_attendance"
-
-                            class="btn btn-primary"
-
-                        >
-
-                            <i class="bi bi-plus-lg me-1"></i>
-
-                            Add Attendance
-
-                        </button>
-
-
-
-                    <?php endif; ?>
-
-
-
+                    </div>
                 </div>
-
-
 
             </div>
 
-
-
         </form>
 
+    <?php elseif ($selectedClass): ?>
 
-
-    </div>
-
-
-
-</div>
-
-
-
-
-
-<!-- =========================================================
-
-     ATTENDANCE RECORDS
-
-========================================================= -->
-
-
-
-<div class="attendance-card">
-
-
-
-    <div class="attendance-card-header">
-
-
-
-        <h2 class="attendance-card-title">
-
-
-
-            <i class="bi bi-table"></i>
-
-            Attendance Records
-
-
-
-        </h2>
-
-
-
-
-
-        <div class="search-wrapper">
-
-
-
-            <i class="bi bi-search"></i>
-
-
-
-            <input
-
-                type="text"
-
-                id="searchAttendance"
-
-                class="form-control"
-
-                placeholder="Search student..."
-
-            >
-
-
-
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-people fs-2 text-muted"></i>
+                <h6 class="fw-semibold mt-2">No Students in This Class</h6>
+                <p class="text-muted small mb-0">
+                    Wala pang naka-assign na bata sa class na ito.
+                </p>
+            </div>
         </div>
 
-
-
-    </div>
-
-
-
-
-
-
-
-        <div class="table-wrapper">
-
-
-
-            <table
-
-                class="table table-hover data-table   mb-0"
-
-                id="attendanceTable"
-
-            >
-
-
-
-                <thead>
-
-
-
-                    <tr>
-
-                        <th>#</th>
-
-                        <th>Student</th>
-
-                        <th>Date</th>
-
-                        <th>Status</th>
-
-                        <th>Reason</th>
-
-                        <th class="text-center">Actions</th>
-
-                    </tr>
-
-
-
-                </thead>
-
-
-
-
-
-                <tbody>
-
-
-
-                    <?php
-
-                    $count = 1;
-
-                    ?>
-
-
-
-                    <?php if ($attendance && $attendance->num_rows > 0): ?>
-
-
-
-                        <?php while ($row = $attendance->fetch_assoc()): ?>
-
-
-
-                            <tr>
-
-
-
-                                <!-- NUMBER -->
-
-
-
-                                <td>
-
-                                    <?= $count++ ?>
-
-                                </td>
-
-
-
-
-
-                                <!-- STUDENT -->
-
-
-
-                                <td class="fw-semibold">
-
-                                    <?= clean($row['student_name']) ?>
-
-                                </td>
-
-
-
-
-
-                                <!-- DATE -->
-
-
-
-                                <td>
-
-                                    <?= date(
-
-                                        'M d, Y',
-
-                                        strtotime($row['attendance_date'])
-
-                                    ) ?>
-
-                                </td>
-
-
-
-
-
-                                <!-- STATUS -->
-
-
-
-                                <td>
-
-
-
-                                    <?php
-
-                                    $statusClasses = [
-
-                                        'Present' => 'badge-present',
-
-                                        'Absent'  => 'badge-absent',
-
-                                        'Late'    => 'badge-late',
-
-                                        'Excused' => 'badge-excused'
-
-                                    ];
-
-
-
-                                    $statusClass =
-
-                                        $statusClasses[$row['status']]
-
-                                        ?? 'badge-excused';
-
-                                    ?>
-
-
-
-                                    <span
-
-                                        class="attendance-badge <?= $statusClass ?>"
-
-                                    >
-
-                                        <?= clean($row['status']) ?>
-
-                                    </span>
-
-
-
-                                </td>
-
-
-
-
-
-                                <!-- REASON -->
-
-
-
-                                <td>
-
-
-
-                                    <?php if (!empty($row['reason'])): ?>
-
-
-
-                                        <?= clean($row['reason']) ?>
-
-
-
-                                    <?php else: ?>
-
-
-
-                                        <span class="text-muted">
-
-                                            —
-
-                                        </span>
-
-
-
-                                    <?php endif; ?>
-
-
-
-                                </td>
-
-
-
-
-
-                                <!-- ACTIONS -->
-
-
-
-                                <td class="text-center">
-
-
-
-                                    <!-- EDIT -->
-
-
-
-                                    <a
-
-                                        href="<?= $baseUrl ?>attendance?edit=<?= $row['id'] ?>"
-
-                                        class="btn btn-sm btn-outline-primary action-btn me-1"
-
-                                        title="Edit"
-
-                                    >
-
-                                        <i class="bi bi-pencil"></i>
-
-                                    </a>
-
-
-
-
-
-                                    <!-- DELETE -->
-
-
-
-                                    <a
-
-                                        href="<?= $baseUrl ?>attendance?delete=<?= $row['id'] ?>"
-
-                                        class="btn btn-sm btn-outline-danger action-btn"
-
-                                        title="Delete"
-
-                                        onclick="return confirm(
-
-                                            'Are you sure you want to delete this attendance record?'
-
-                                        );"
-
-                                    >
-
-                                        <i class="bi bi-trash"></i>
-
-                                    </a>
-
-
-
-                                </td>
-
-
-
-                            </tr>
-
-
-
-                        <?php endwhile; ?>
-
-
-
-                    <?php else: ?>
-
-
-
-                        <tr>
-
-
-
-                            <td
-
-                                colspan="6"
-
-                                class="text-center py-5 text-muted"
-
-                            >
-
-                                <i
-
-                                    class="bi bi-calendar-x fs-2 d-block mb-2"
-
-                                ></i>
-
-
-
-                                No attendance records found.
-
-
-
-                            </td>
-
-
-
-                        </tr>
-
-
-
-                    <?php endif; ?>
-
-
-
-                </tbody>
-
-
-
-            </table>
-
-
-
+    <?php else: ?>
+
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-clipboard-check fs-2 text-muted"></i>
+                <h6 class="fw-semibold mt-2">Select a Class</h6>
+                <p class="text-muted small mb-0">
+                    Pumili ng class at date para mag-record ng attendance.
+                </p>
+            </div>
         </div>
 
-
-
-
+    <?php endif; ?>
 
 </div>
-
-
-
-
-
-<!-- =====================================================
-
-     SEARCH
-
-====================================================== -->
-
 
 
 <script>
+(function () {
+    const btn = document.getElementById('markAllPresentBtn');
 
+    if (!btn) return;
 
-
-    document
-
-        .getElementById("searchAttendance")
-
-        .addEventListener("keyup", function () {
-
-
-
-            let searchValue =
-
-                this.value.toLowerCase();
-
-
-
-            let rows =
-
-                document.querySelectorAll(
-
-                    "#attendanceTable tbody tr"
-
-                );
-
-
-
-
-
-            rows.forEach(function (row) {
-
-
-
-                let text =
-
-                    row.textContent.toLowerCase();
-
-
-
-
-
-                if (text.includes(searchValue)) {
-
-
-
-                    row.style.display = "";
-
-
-
-                } else {
-
-
-
-                    row.style.display = "none";
-
-
-
-                }
-
-
-
-            });
-
-
-
-        });
-
-
-
+    btn.addEventListener('click', function () {
+        const radios = document.querySelectorAll('input.attendance-radio[value="present"]');
+        radios.forEach(r => r.checked = true);
+    });
+})();
 </script>
 
-
-
-
-
 <?php include '../layout/footer.php'; ?>
-
