@@ -161,10 +161,21 @@ include '../layout/header.php';
             <?= e($pageTitle) ?>
         </h2>
 
-        <a href="archive.php" class="btn btn-warning px-2 py-1"
-           data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Archive">
+        <div class="d-flex align-items-center gap-2">
+
+            <a href="create-walkin.php" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Walk-in
+            </a>
+
+            <a href="archive.php" class="btn btn-warning px-2 py-1"
+            data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Archive">
             <i class="bi bi-archive fs-6 fw-bolder"></i>
-        </a>
+            </a>
+
+        </div>
+
+        
 
     </div>
 

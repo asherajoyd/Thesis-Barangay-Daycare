@@ -135,6 +135,59 @@ $currentPage = $pageTitle ?? '';
 
         </div>
 
+
+        <div class="sidebar-section">
+
+        <span class="sidebar-section-title">
+                RECORDS
+            </span>
+
+            <nav class="sidebar-nav">
+
+                <!-- Health Records -->
+                <a
+                    href="<?= $baseUrl ?>health-records/"
+                    class="sidebar-link <?= $currentPage === 'Health Records' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-door-open"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Health Records
+                    </span>
+                </a>
+
+                <!-- Activities -->
+                <a
+                    href="<?= $baseUrl ?>activities/"
+                    class="sidebar-link <?= $currentPage === 'Activities' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Activities
+                    </span>
+                </a>
+
+                <!-- Messages -->
+                <a
+                    href="<?= $baseUrl ?>messages/"
+                    class="sidebar-link <?= $currentPage === 'Messages' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Messages
+                    </span>
+                </a>
+
+
+        </div>
     </div>
 
 

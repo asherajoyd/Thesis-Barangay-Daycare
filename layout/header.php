@@ -28,19 +28,36 @@
   
   <nav class="navbar navbar-expand-lg bg-white py-3 sticky-top border">
     <div class="container">
-      <a class="navbar-brand" href="index.php">Dashboard</a>
+       <!-- Logo and Brand -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.php">
+            <img
+                src="api/image/logo.jpg"
+                width="52"
+                height="52"
+                class="rounded-circle object-fit-cover"
+                alt="Barangay Daycare Center Logo"
+            >
+            <div class="d-flex flex-column">
+                <span class="fw-bold text-primary brand-title">
+                    Barangay Daycare
+                </span>
+                <small class="text-secondary small">
+                    Child Development Center
+                </small>
+            </div>
+        </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse py-md-0 py-3" id="navbarSupportedContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-3 gap-lg-4">
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" aria-current="page" href="#">Home</a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="#about">About</a>
-          </li>
+          </li> -->
         </ul>
       
         <div class="d-flex gap-3">

@@ -205,7 +205,7 @@ $uploads = [
     'address' => 'Proof of Address'
 ];
 
-$uploadedFiles = [];   // storage ng mga na-upload para sa cleanup
+$uploadedFiles = [];
 $uploadDir = __DIR__ . '/file-image/';
 
 
@@ -310,7 +310,7 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | 1. INSERT CHILD
+    | 1. INSERT CHILD (walang user_id muna)
     |--------------------------------------------------------------------------
     */
 
@@ -417,91 +417,31 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | 4. INSERT GUARDIAN USER ACCOUNT
-    |--------------------------------------------------------------------------
-    */
-
-    $defaultPassword = password_hash('password123', PASSWORD_DEFAULT);
-    $role            = 'parent';
-    $userStatus      = 'active';
-
-    $stmtUser = $conn->prepare("
-        INSERT INTO users (
-            first_name,
-            middle_name,
-            last_name,
-            email,
-            password,
-            contact,
-            role,
-            status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $stmtUser->bind_param(
-        "ssssssss",
-        $g_first_name,
-        $g_middle_name,
-        $g_last_name,
-        $g_email,
-        $defaultPassword,
-        $g_contact,
-        $role,
-        $userStatus
-    );
-
-    if (!$stmtUser->execute()) {
-        throw new Exception('Failed to create guardian account: ' . $stmtUser->error);
-    }
-
-    $user_id = $stmtUser->insert_id;
-    $stmtUser->close();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | 5. UPDATE CHILDREN — LINK PARENT USER
-    |--------------------------------------------------------------------------
-    */
-
-    $stmtLink = $conn->prepare("
-        UPDATE children SET user_id = ? WHERE id = ?
-    ");
-
-    $stmtLink->bind_param("ii", $user_id, $child_id);
-
-    if (!$stmtLink->execute()) {
-        throw new Exception('Failed to link child to guardian: ' . $stmtLink->error);
-    }
-
-    $stmtLink->close();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | 6. INSERT GUARDIAN SA parent_info
+    | 4. INSERT GUARDIAN SA parent_info (may email at contact na)
     |--------------------------------------------------------------------------
     */
 
     $stmtG = $conn->prepare("
         INSERT INTO parent_info (
-            user_id,
             child_id,
             first_name,
             middle_name,
             last_name,
+            email,
+            contact,
             relationship,
             is_primary
-        ) VALUES (?, ?, ?, ?, ?, 'guardian', 1)
+        ) VALUES (?, ?, ?, ?, ?, ?, 'guardian', 1)
     ");
 
     $stmtG->bind_param(
-        "iisss",
-        $user_id,
+        "isssss",
         $child_id,
         $g_first_name,
         $g_middle_name,
-        $g_last_name
+        $g_last_name,
+        $g_email,
+        $g_contact
     );
 
     if (!$stmtG->execute()) {
@@ -513,7 +453,7 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | 7. INSERT ENROLLMENT
+    | 5. INSERT ENROLLMENT
     |--------------------------------------------------------------------------
     */
 
@@ -544,7 +484,7 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | 8. INSERT ENROLLMENT DOCUMENTS
+    | 6. INSERT ENROLLMENT DOCUMENTS
     |--------------------------------------------------------------------------
     */
 
@@ -583,7 +523,7 @@ try {
 
     echo json_encode([
         'status'  => 'success',
-        'message' => 'Enrollment application submitted successfully. Your guardian account has been created — you may now log in using your email and default password "password123".'
+        'message' => 'Enrollment application submitted successfully. Please wait for the administrator to review your application.'
     ]);
 
 

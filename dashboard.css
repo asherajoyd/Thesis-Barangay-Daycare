@@ -550,11 +550,7 @@ a {
 
     border-radius: 10px;
 
-    transition: background-color 0.2s ease;
-}
-
-.user-dropdown:hover {
-    background-color: var(--color-background);
+    /* transition: background-color 0.2s ease; */
 }
 
 

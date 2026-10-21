@@ -55,6 +55,20 @@ $currentPage = $pageTitle ?? '';
                     </span>
                 </a>
 
+                <!-- Announcements -->
+                <a
+                    href="<?= $baseUrl ?>announcement/"
+                    class="sidebar-link <?= $currentPage === 'Announcement' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Announcements
+                    </span>
+                </a>
+
             </nav>
 
         </div>
@@ -122,30 +136,45 @@ $currentPage = $pageTitle ?? '';
 
 
         <!-- =====================================================
-             UPDATES
+             Records
         ====================================================== -->
 
         <div class="sidebar-section">
 
             <span class="sidebar-section-title">
-                UPDATES
+                Records
             </span>
 
             <nav class="sidebar-nav">
-
-                <!-- Announcements -->
+                <!-- Health Records -->
                 <a
-                    href="<?= $baseUrl ?>announcement/"
-                    class="sidebar-link <?= $currentPage === 'Announcement' ? 'active' : '' ?>"
+                    href="<?= $baseUrl ?>health-records/"
+                    class="sidebar-link <?= $currentPage === 'Health Records' ? 'active' : '' ?>"
                 >
                     <span class="sidebar-icon">
-                        <i class="bi bi-megaphone"></i>
+                        <i class="bi bi-door-open"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Announcements
+                        Health Records
                     </span>
                 </a>
+
+                <!-- Messages -->
+                <a
+                    href="<?= $baseUrl ?>messages/"
+                    class="sidebar-link <?= $currentPage === 'Messages' ? 'active' : '' ?>"
+                >
+                    <span class="sidebar-icon">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Messages
+                    </span>
+                </a>
+
+                
 
             </nav>
 

@@ -149,12 +149,12 @@
                             <hr class="dropdown-divider">
                         </li>
 
-                        <li>
+                        <!-- <li>
                             <a class="dropdown-item" href="profile.php">
                                 <i class="bi bi-person"></i>
                                 Profile
                             </a>
-                        </li>
+                        </li> -->
 
                         <li>
                             <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right"></i> Sign Out </a>

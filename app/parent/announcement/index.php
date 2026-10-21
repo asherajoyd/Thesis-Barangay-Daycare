@@ -120,7 +120,7 @@ include '../layout/header.php';
                         </div>
 
                         <!-- Content -->
-                        <div class="text-break" style="white-space: pre-line;">
+                        <div class="text-break" >
                             <?= e($a['content']) ?>
                         </div>
 

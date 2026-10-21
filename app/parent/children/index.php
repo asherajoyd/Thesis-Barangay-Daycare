@@ -1,6 +1,6 @@
 <?php
 
-$pageTitle = "My Children";
+$pageTitle = "Children";
 
 require_once '../guard.php';
 include "../../../api/conn.php";

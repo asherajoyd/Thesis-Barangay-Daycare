@@ -86,6 +86,130 @@
 
 
                 <div class="header-divider"></div> -->
+                
+                <!-- NOTIFICATION BELL -->
+                <div class="dropdown">
+
+                    <button class="btn btn-sm btn-light border position-relative"
+                            type="button"
+                            id="notifBell"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false">
+
+                        <i class="bi bi-bell"></i>
+
+                        <span id="notifBadge"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+                            style="font-size: 0.6rem;">
+                            0
+                        </span>
+
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end p-0 shadow"
+                        style="width: 340px; max-height: 450px; overflow-y: auto;"
+                        id="notifDropdown">
+
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                            <h6 class="fw-bold mb-0">Notifications</h6>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0"
+                                    id="markAllReadBtn" style="font-size: 0.75rem;">
+                                Mark all read
+                            </button>
+                        </div>
+
+                        <div id="notifList" class="p-0">
+                            <div class="text-center text-muted py-4 small">
+                                Loading...
+                            </div>
+                        </div>
+
+                        <a href="<?= $baseUrl ?>notification/"
+                        class="dropdown-item text-center text-primary fw-semibold py-2 border-top">
+                            View All Notifications
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <script>
+                (function () {
+
+                    const notifBadge     = document.getElementById('notifBadge');
+                    const notifList      = document.getElementById('notifList');
+                    const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+                    function loadCount() {
+                        fetch('<?= $baseUrl ?>notification/fetch.php')
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.unread > 0) {
+                                    notifBadge.textContent = data.unread > 9 ? '9+' : data.unread;
+                                    notifBadge.classList.remove('d-none');
+                                } else {
+                                    notifBadge.classList.add('d-none');
+                                }
+                            })
+                            .catch(() => {});
+                    }
+
+                    function loadList() {
+                        fetch('<?= $baseUrl ?>notification/fetch-list.php')
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data.notifications || data.notifications.length === 0) {
+                                    notifList.innerHTML = '<div class="text-center text-muted py-4 small">No notifications</div>';
+                                    return;
+                                }
+
+                                let html = '';
+
+                                data.notifications.forEach(function (n) {
+                                    html += `
+                                        <a href="${n.link || '#'}" class="dropdown-item border-bottom p-2 ${n.is_read === 0 ? 'bg-light' : ''}">
+                                            <div class="d-flex align-items-start gap-2">
+                                                <i class="bi ${n.icon} ${n.color} fs-5"></i>
+                                                <div class="min-w-0">
+                                                    <div class="fw-semibold small text-break">${n.title}</div>
+                                                    ${n.message ? `<div class="text-muted text-break" style="font-size: 0.75rem;">${n.message}</div>` : ''}
+                                                    <div class="text-muted" style="font-size: 0.7rem;">${n.time_ago}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    `;
+                                });
+
+                                notifList.innerHTML = html;
+                            })
+                            .catch(() => {});
+                    }
+
+                    loadCount();
+
+                    document.getElementById('notifBell').addEventListener('click', function () {
+                        loadList();
+                    });
+
+                    markAllReadBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        const formData = new FormData();
+                        formData.append('all', '1');
+
+                        fetch('<?= $baseUrl ?>notification/mark-read.php', { method: 'POST', body: formData })
+                            .then(() => {
+                                loadCount();
+                                loadList();
+                            });
+                    });
+
+                    setInterval(loadCount, 30000);
+
+                })();
+                </script>
 
 
                 <!-- User -->
@@ -150,25 +274,15 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="profile.php">
+                            <a class="dropdown-item" href="<?= $baseUrl ?>profile/">
                                 <i class="bi bi-person"></i>
                                 Profile
                             </a>
                         </li>
 
-                        <li>
-                            <a class="dropdown-item" href="settings.php">
-                                <i class="bi bi-gear"></i>
-                                Settings
-                            </a>
-                        </li>
 
                         <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right me-2"></i> Sign Out </a>
+                            <a href="../../../api/logout.php" class="dropdown-item"> <i class="bi bi-box-arrow-right"></i> Sign Out </a>
                         </li>
 
                     </ul>

@@ -75,6 +75,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
+            // ==========================================================
+            // NOTIFY AUDIENCE (published only)
+            // ==========================================================
+
+            if ($status === 'published') {
+
+                require_once '../../../api/notification-helper.php';
+
+                if ($audience === 'parent') {
+                    notifyAllParents(
+                        $conn,
+                        'announcement',
+                        'New Announcement: ' . $title,
+                        mb_strimwidth($content, 0, 100, '...'),
+                        '../announcement/'
+                    );
+                } elseif ($audience === 'teacher') {
+                    notifyAllTeachers(
+                        $conn,
+                        'announcement',
+                        'New Announcement: ' . $title,
+                        mb_strimwidth($content, 0, 100, '...'),
+                        '../announcement/'
+                    );
+                } else {
+                    // 'all' — notify both
+                    notifyAllParents(
+                        $conn,
+                        'announcement',
+                        'New Announcement: ' . $title,
+                        mb_strimwidth($content, 0, 100, '...'),
+                        '../announcement/'
+                    );
+
+                    notifyAllTeachers(
+                        $conn,
+                        'announcement',
+                        'New Announcement: ' . $title,
+                        mb_strimwidth($content, 0, 100, '...'),
+                        '../announcement/'
+                    );
+                }
+            }
+
+
             $_SESSION['status']  = "success";
             $_SESSION['message'] = "Announcement created successfully.";
 
