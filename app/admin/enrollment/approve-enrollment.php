@@ -204,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         |--------------------------------------------------------------------------
         */
 
+        
         $conn->commit();
 
         // ==========================================================
@@ -222,8 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             '../children/'
         );
 
-        // Notify teacher (if assigned to class)
-        // Note: Kung may class assignment na sa enrollment
+        // Notify teacher if assigned to a class
         $classStmt = $conn->prepare("
             SELECT cl.teacher_id
             FROM enrollment e
@@ -231,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             WHERE e.id = ?
             LIMIT 1
         ");
+
         $classStmt->bind_param("i", $id);
         $classStmt->execute();
         $classRow = $classStmt->get_result()->fetch_assoc();
@@ -255,6 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $_SESSION['status']  = "success";
         $_SESSION['message'] = $message;
+
 
     } catch (Exception $e) {
 
