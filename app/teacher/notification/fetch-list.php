@@ -74,14 +74,48 @@ echo json_encode(['notifications' => $notifications]);
 
 function timeAgo($datetime)
 {
-    $now  = new DateTime();
-    $then = new DateTime($datetime);
-    $diff = $now->diff($then);
+    $timezone = new DateTimeZone('Asia/Manila');
 
-    if ($diff->y > 0) return $diff->y . 'y ago';
-    if ($diff->m > 0) return $diff->m . 'mo ago';
-    if ($diff->d > 0) return $diff->d . 'd ago';
-    if ($diff->h > 0) return $diff->h . 'h ago';
-    if ($diff->i > 0) return $diff->i . 'm ago';
-    return 'just now';
+    $now = new DateTimeImmutable('now', $timezone);
+
+    // Assumes created_at is stored in Philippine local time.
+    $then = new DateTimeImmutable($datetime, $timezone);
+
+    $seconds = $now->getTimestamp() - $then->getTimestamp();
+
+    if ($seconds < 0) {
+        return 'just now';
+    }
+
+    if ($seconds < 60) {
+        return 'just now';
+    }
+
+    if ($seconds < 3600) {
+        $minutes = (int) floor($seconds / 60);
+        return $minutes . ($minutes === 1 ? ' minute ago' : ' minutes ago');
+    }
+
+    if ($seconds < 86400) {
+        $hours = (int) floor($seconds / 3600);
+        return $hours . ($hours === 1 ? ' hour ago' : ' hours ago');
+    }
+
+    if ($seconds < 604800) {
+        $days = (int) floor($seconds / 86400);
+        return $days . ($days === 1 ? ' day ago' : ' days ago');
+    }
+
+    if ($seconds < 2592000) {
+        $weeks = (int) floor($seconds / 604800);
+        return $weeks . ($weeks === 1 ? ' week ago' : ' weeks ago');
+    }
+
+    if ($seconds < 31536000) {
+        $months = (int) floor($seconds / 2592000);
+        return $months . ($months === 1 ? ' month ago' : ' months ago');
+    }
+
+    $years = (int) floor($seconds / 31536000);
+    return $years . ($years === 1 ? ' year ago' : ' years ago');
 }
